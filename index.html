@@ -58,8 +58,11 @@ button{
 button:active{transform:translate(3px,3px);box-shadow:2px 2px 0 var(--glow)}
 button:disabled{opacity:.35;cursor:default;transform:none;box-shadow:5px 5px 0 var(--dim)}
 .hidden{display:none!important}
-#hud{display:flex;justify-content:space-between;font-size:10px;margin-bottom:18px;color:var(--dim)}
+#hud{display:flex;justify-content:space-between;align-items:center;font-size:10px;margin-bottom:18px;color:var(--dim)}
 #hud b{color:var(--ink)}
+.hud-left,.hud-right{display:flex;align-items:center;gap:8px}
+.hud-btn{margin:0;padding:7px 9px;font-size:9px;box-shadow:3px 3px 0 var(--glow)}
+#quitRun{margin-top:12px;font-size:9px;padding:9px 12px}
 #notebook{background:#fdf6e3;color:#3a2f1a;border:5px solid var(--ink);padding:16px 18px;margin-bottom:20px;box-shadow:5px 5px 0 rgba(0,0,0,.2);perspective:800px;text-align:left}
 .nb-header{font-size:9px;letter-spacing:1px;color:#9a865a;margin-bottom:10px;display:flex;justify-content:space-between}
 .nb-page{min-height:70px;display:flex;align-items:center}
@@ -114,6 +117,14 @@ button:disabled{opacity:.35;cursor:default;transform:none;box-shadow:5px 5px 0 v
 .c9{background:#e1fbff;border-color:#3fb2c9}
 .meta-row{display:flex;justify-content:space-between;align-items:center;border:2px solid var(--dim);padding:10px;margin:8px 0;font-size:9px;text-align:left}
 .meta-row div{flex:1}
+.map-card{display:flex;flex-direction:column;align-items:flex-start;border:3px solid var(--ink);background:var(--panel);padding:12px;margin:8px 0;text-align:left;cursor:pointer;box-shadow:4px 4px 0 rgba(0,0,0,.25)}
+.map-card b{font-size:10px;margin-bottom:6px}
+.map-card span{font-size:8px;color:var(--dim);line-height:1.6}
+.path-btn{display:block;width:100%;margin:8px 0;text-align:left}
+.blocked-badge{position:absolute;inset:0;z-index:5;display:flex;align-items:center;justify-content:center;
+  background:rgba(120,10,20,.82);color:#fff;font-size:8px;text-align:center;padding:6px;line-height:1.6;
+  animation:shake .4s}
+@keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-4px)}40%{transform:translateX(4px)}60%{transform:translateX(-3px)}80%{transform:translateX(3px)}}
 .small{font-size:8px;color:var(--dim)}
 </style>
 </head>
@@ -128,17 +139,25 @@ button:disabled{opacity:.35;cursor:default;transform:none;box-shadow:5px 5px 0 v
   <h1>DoomDoors</h1>
   <div class="rainbow-bar"></div>
   <div class="sub">six doors. one rule. no way back.</div>
-  <button onclick="startRun()">PLAY</button><br>
+  <button onclick="showMapSelect()">PLAY</button><br>
   <button onclick="openMeta()">UPGRADES</button>
 </div>
 
+<div id="screen-mapselect" class="hidden">
+  <h1 style="font-size:20px">CHOOSE A PLACE</h1>
+  <div id="mapList"></div>
+  <button onclick="backTitle()">BACK</button>
+</div>
+
 <div id="screen-game" class="hidden">
-  <div id="hud"><span>ROOM <b id="round">0</b></span><span>$<b id="money">0</b></span></div>
+  <div id="hud"><div class="hud-left"><span>ROOM <b id="round">0</b></span><span>$<b id="money">0</b></span></div><div class="hud-right"><button class="hud-btn" onclick="showInfo()">i</button></div></div>
+  <div id="statusRow" class="small" style="margin-bottom:10px;min-height:10px"></div>
   <div id="notebook">
     <div class="nb-header"><span>RULE BOOK</span><span><span id="ruleCount">0</span> pages</span></div>
     <div class="nb-page"><div class="nb-page-inner" id="rulePageInner">No rule yet.</div></div>
   </div>
   <div id="doors"></div>
+  <button id="quitRun" onclick="requestEndRun()">BEENDEN</button>
 </div>
 
 <div id="screen-meta" class="hidden">
@@ -182,26 +201,76 @@ function callRuleHook(hook, ...args){
 function ruleBlocksDoor(door){
   return run.rules.some(r=> typeof r.validate==='function' && r.validate(run, door)===false);
 }
-function flashBlocked(frame){
-  const msgEl=frame.querySelector('.msg');
-  msgEl.textContent='BLOCKED';
-  setTimeout(()=>{ if(msgEl) msgEl.textContent=''; },600);
-}
+function hasRule(id){ return run.rules.some(r=>r.id===id); }
 
-// ---------- locations (unlocked with rule points) ----------
-const LOCATIONS=[
-  {name:'The Hut', cost:0, mult:1.0, unlocks:['blue','red','rainbow','eyes','led']},
-  {name:'The House', cost:15, mult:1.15, unlocks:['devil']},
-  {name:'The Mysterious House', cost:40, mult:1.35, unlocks:['angel']},
-  {name:'The Old Castle', cost:90, mult:1.6, unlocks:['joker']},
-  {name:'The Endless Corridor', cost:170, mult:2.0, unlocks:['flame']},
-];
-if(meta.locationLvl===undefined) meta.locationLvl=0;
-function locationMult(){ return LOCATIONS[meta.locationLvl].mult; }
-function unlockedTypes(){
-  let ids=[];
-  for(let i=0;i<=meta.locationLvl;i++) ids=ids.concat(LOCATIONS[i].unlocks);
-  return ids;
+// ---------- Phase 3 helpers ----------
+function snapshotRun(){
+  return {money:run.money, doorsOpened:run.doorsOpened, streak:run.streak, lastType:run.lastType,
+    debt:run.debt, strikes:run.strikes, decisionsRemaining:run.decisionsRemaining, clockExpired:run.clockExpired,
+    echoSource:run.echoSource, mirrorBias:{...(run.mirrorBias||{})},
+    seedGrowth: run.seed?run.seed.growth:undefined, seedRequired: run.seed?run.seed.required:undefined,
+    floor:run.floor, pathMult:run.pathMult, pathForceRule:run.pathForceRule};
+}
+function restoreRun(s, doorTypeId){
+  run.money=s.money; run.doorsOpened=s.doorsOpened; run.streak=s.streak; run.lastType=s.lastType;
+  run.debt=s.debt; run.strikes=s.strikes; run.decisionsRemaining=s.decisionsRemaining; run.clockExpired=s.clockExpired;
+  run.echoSource=s.echoSource; run.mirrorBias=s.mirrorBias;
+  if(run.seed){ run.seed.growth=s.seedGrowth; run.seed.required=s.seedRequired; }
+  run.floor=s.floor; run.pathMult=s.pathMult; run.pathForceRule=s.pathForceRule;
+  run.doorHistory.pop();
+  meta.stats.doorsByType[doorTypeId]=Math.max(0,(meta.stats.doorsByType[doorTypeId]||1)-1);
+  document.getElementById('money').textContent=run.money;
+  renderStatus();
+}
+function showRuleBreakerPrompt(d, frame){
+  const ov=document.getElementById('overlay');
+  ov.classList.remove('hidden');
+  ov.innerHTML=`<div class="card-box"><h2>BLOCKED</h2><p>A rule blocks this door. Use your Rule Breaker to ignore it once?</p>
+    <button id="rbYes">USE RULE BREAKER</button> <button id="rbNo">CANCEL</button></div>`;
+  document.getElementById('rbYes').onclick=()=>{ run.ruleBreakerUses--; run.skipValidateOnce=true; ov.classList.add('hidden'); openDoor(d,frame); };
+  document.getElementById('rbNo').onclick=()=>{ ov.classList.add('hidden'); };
+}
+function showSecondChancePrompt(preSnap, d, frame){
+  const ov=document.getElementById('overlay');
+  ov.classList.remove('hidden');
+  ov.innerHTML=`<div class="card-box"><h2>YOU LOST...</h2><p>Use your Second Chance to undo this door and try again?</p>
+    <button id="scYes">UNDO (1 USE)</button> <button id="scNo">ACCEPT LOSS</button></div>`;
+  document.getElementById('scYes').onclick=()=>{
+    run.secondChanceUses--;
+    restoreRun(preSnap, d.id);
+    ov.classList.add('hidden');
+    frame.querySelector('.door-leaf').classList.remove('open');
+    frame.querySelector('.amt').textContent=''; frame.querySelector('.msg').textContent='';
+    busy=false;
+  };
+  document.getElementById('scNo').onclick=()=>{
+    ov.classList.add('hidden');
+    frame.querySelector('.amt').textContent='☠'; frame.querySelector('.msg').textContent='LOST';
+    setTimeout(()=>runOver(),400);
+  };
+}
+function showDoubleDownPrompt(gain, onResolved){
+  const ov=document.getElementById('overlay');
+  ov.classList.remove('hidden');
+  ov.innerHTML=`<div class="card-box"><h2>DOUBLE DOWN?</h2><p>You won $${gain}. Take it, or risk it all for double?</p>
+    <button id="ddTake">TAKE $${gain}</button> <button id="ddDouble">DOUBLE OR NOTHING</button></div>`;
+  document.getElementById('ddTake').onclick=()=>{ ov.classList.add('hidden'); onResolved(gain); };
+  document.getElementById('ddDouble').onclick=()=>{
+    ov.classList.add('hidden');
+    const win=Math.random()<0.5;
+    const finalGain= win? gain*2 : 0;
+    popup(win?'DOUBLED!':'LOST IT ALL', win?('You doubled it: +$'+finalGain):'The bet failed — you get $0', ()=>onResolved(finalGain));
+  };
+}
+function getBlockingRule(door){
+  return run.rules.find(r=> typeof r.validate==='function' && r.validate(run, door)===false);
+}
+function flashBlocked(frame, ruleObj){
+  const badge=document.createElement('div');
+  badge.className='blocked-badge';
+  badge.textContent='🚫 BLOCKED'+(ruleObj && ruleObj.id ? ' — '+ruleObj.id.toUpperCase() : '');
+  frame.appendChild(badge);
+  setTimeout(()=>badge.remove(), 750);
 }
 
 // ---------- door types ----------
@@ -217,9 +286,27 @@ const DOOR_TYPES=[
  {id:'flame',cls:'d-flame',name:'Flame'},
 ];
 
+function locationMult(){ return 1; }
+function unlockedTypes(){ return DOOR_TYPES.map(d=>d.id); }
+
+
+// ---------- Phase 2 rules: use the generic hook interface ----------
+function phase2Rules(){
+  return [
+    {id:'memory', neg:true, text:'MEMORY: you may not choose the same door type twice in a row',
+      validate(run, door){ return door.id !== run.lastType; }},
+    {id:'clock', neg:true, text:'THE CLOCK: you have 20 door choices left before the run ends',
+      onDoorSelected(run){ run.decisionsRemaining--; if(run.decisionsRemaining<=0) run.clockExpired=true; }},
+    {id:'three_strikes', neg:true, text:'THREE STRIKES: 3 close calls this run and it\'s over'},
+    {id:'no_safe_door', neg:true, text:'NO SAFE DOOR: every door gets a random extra risk each room'},
+    {id:'debt', neg:true, text:'THE DEBT: big wins are borrowed — they get repaid with interest next room'},
+    {id:'echo', neg:true, text:'THE ECHO: sometimes a door repeats the fate of the last one you opened'},
+  ];
+}
 // ---------- rule pool ----------
 function rulePool(){
   const t=DOOR_TYPES;
+  const p2=phase2Rules().filter(r=>!hasRule(r.id));
   return [
     ...t.map(d=>{const mod=0.15+Math.random()*0.25; return {neg:true,type:d.id,mod,
       text:`${d.name} doors have +${Math.round(mod*100)}% chance to end the run`};}),
@@ -232,6 +319,7 @@ function rulePool(){
     {neg:true, effect:'streak', mod:5, text:'Open the same door type 5 times in a row and the run ends'},
     {neg:false, effect:'fastrules', text:'From now on a new rule appears every 7 doors instead of 5'},
     {neg:false, effect:'fastshop', text:'From now on the shop appears every 7 doors instead of 10'},
+    ...p2,
   ];
 }
 function randomStarterRule(){
@@ -239,12 +327,74 @@ function randomStarterRule(){
   return picks[Math.floor(Math.random()*picks.length)];
 }
 
+// ---------- Phase 4: maps (lightweight modifiers on the existing room loop,
+// not a full node-graph rewrite — see chat for why) ----------
+const MAPS=[
+  {id:'endless_hall', name:'The Endless Hall', desc:'No real end — difficulty quietly rises the longer you survive.'},
+  {id:'tower', name:'The Tower', desc:'Every 5 doors you climb a floor. Each floor permanently locks in a new law.'},
+  {id:'labyrinth', name:'The Labyrinth', desc:'Every 3 rooms you pick a path: more rules, or more gold.'},
+  {id:'mirror', name:'The Mirror', desc:'What happens to one door type echoes onto the next room\'s matching door.'},
+  {id:'garden', name:'The Garden', desc:'Grow a seed each room. Let it bloom for a big payout.'},
+];
+const TOWER_LAWS=['memory','echo','clock'];
+const MAP_DEFS={
+  endless_hall:{ extraRisk(run){ const n=run.doorsOpened;
+    if(n>30) return 0.09; if(n>20) return 0.06; if(n>10) return 0.04; if(n>5) return 0.02; return 0; } },
+  tower:{
+    onRoomStart(run){
+      const floor=Math.floor(run.doorsOpened/5)+1;
+      if(floor!==run.floor){
+        run.floor=floor;
+        const tmpl=TOWER_LAWS[floor-2] && phase2Rules().find(r=>r.id===TOWER_LAWS[floor-2]);
+        if(tmpl && !hasRule(tmpl.id)){
+          run.rules.push(tmpl); renderRules(true);
+          popup('FLOOR '+floor, 'A new law takes hold:\n'+tmpl.text, ()=>{});
+        }
+      }
+    }
+  },
+  mirror:{
+    extraRisk(run, type){ return (run.mirrorBias && run.mirrorBias[type]) || 0; },
+    onDoorResolved(run, door, died){ run.mirrorBias=run.mirrorBias||{}; run.mirrorBias[door.id]=died?0.15:-0.05; }
+  },
+  garden:{
+    onRoomStart(run){
+      run.seed=run.seed||{growth:0, required:3};
+      run.seed.growth++;
+      if(run.seed.growth>=run.seed.required){
+        const bonus=Math.round(20+run.seed.required*8);
+        run.money+=bonus;
+        run.seed.growth=0; run.seed.required+=2;
+        popup('SEED BLOOMS', 'Your seed blooms: +$'+bonus, ()=>{});
+      }
+    }
+  },
+  labyrinth:{ onRoomStart(run){ if(run.round%3!==1) run.pathMult=1; } }
+};
+
 // ---------- run state ----------
 let run=null;
-function startRun(){
+function showMapSelect(){
+  const el=document.getElementById('mapList');
+  el.innerHTML='';
+  MAPS.forEach(m=>{
+    const div=document.createElement('div');
+    div.className='map-card';
+    div.innerHTML=`<b>${m.name}</b><span>${m.desc}</span>`;
+    div.onclick=()=>startRun(m.id);
+    el.appendChild(div);
+  });
+  show('screen-mapselect');
+}
+function startRun(mapId){
   run={round:0, money:0, rules:[], doorsOpened:0, over:false, moneyMult:1, shield:0,
        ruleInterval:5, shopInterval:10, lastType:null, streak:0, doorHistory:[],
-       upgrades:[], discoveredSecrets:[]};
+       upgrades:[], discoveredSecrets:[], strikes:0, debt:0, decisionsRemaining:null,
+       clockExpired:false, echoSource:null, map:mapId, floor:1, mirrorBias:{},
+       seed:{growth:0,required:3}, pathMult:1,
+       secondChanceUses:0, sixthSense:false, keyFragments:{a:false,b:false,c:false},
+       masterDoorUsed:false, doubleDown:false, blindfold:false, cartographer:false,
+       ruleBreakerUses:0, doorMastery:false, skipValidateOnce:false};
   run.rules.push(randomStarterRule());
   show('screen-game');
   nextRound();
@@ -253,8 +403,47 @@ function backTitle(){ show('screen-title'); }
 function openMeta(){ renderMeta(); show('screen-meta'); }
 
 function show(id){
-  ['screen-title','screen-game','screen-meta'].forEach(s=>document.getElementById(s).classList.toggle('hidden', s!==id));
+  ['screen-title','screen-mapselect','screen-game','screen-meta'].forEach(s=>document.getElementById(s).classList.toggle('hidden', s!==id));
   document.getElementById('overlay').classList.add('hidden');
+}
+
+function showInfo(){
+  const ov=document.getElementById('overlay');
+  ov.classList.remove('hidden');
+  ov.innerHTML=`<div class="card-box"><h2>SPIELREGELN</h2>
+    <p><b>Ziel:</b> Wähle in jedem Raum eine Tür. Eine falsche Tür kann den Lauf beenden.</p>
+    <p><b>Türen:</b> Öffne eine Tür und versuche, die jeweilige Gefahr zu überleben. Deine aktiven Regeln können Türen verändern oder blockieren.</p>
+    <p><b>Regeln:</b> Neue Regeln kommen im Verlauf des Levels dazu und bleiben für den aktuellen Lauf aktiv. Sie werden im RULE BOOK angezeigt.</p>
+    <p><b>Geld:</b> Überlebte Türen bringen Geld. Im Shop kannst du es für Vorteile in diesem Lauf ausgeben.</p>
+    <p><b>Fortschritt:</b> Neue Regeln erscheinen normalerweise alle 5 geöffneten Türen; der Shop normalerweise alle 10.</p>
+    <p><b>RULE POINTS:</b> Wenn du einen Lauf normal beendest, erhältst du RULE POINTS abhängig von deinem Fortschritt.</p>
+    <p><b>BEENDEN:</b> Du kannst einen Lauf jederzeit freiwillig beenden. Ein freiwillig beendeter Lauf gibt <b>0 RULE POINTS</b>.</p>
+    <button id="closeInfo">SCHLIESSEN</button></div>`;
+  document.getElementById('closeInfo').onclick=()=>ov.classList.add('hidden');
+}
+function requestEndRun(){
+  if(!run || run.over) return;
+  const ov=document.getElementById('overlay');
+  ov.classList.remove('hidden');
+  ov.innerHTML=`<div class="card-box"><h2>LAUF BEENDEN?</h2>
+    <p>Wenn du jetzt freiwillig beendest, erhältst du <b>0 RULE POINTS</b>.</p>
+    <button id="endYes">BEENDEN</button>
+    <button id="endNo">WEITERSPIELEN</button></div>`;
+  document.getElementById('endYes').onclick=()=>endRunVoluntarily();
+  document.getElementById('endNo').onclick=()=>ov.classList.add('hidden');
+}
+function endRunVoluntarily(){
+  if(!run || run.over) return;
+  run.over=true;
+  meta.stats.runs++;
+  saveMeta();
+  const ov=document.getElementById('overlay');
+  ov.classList.remove('hidden');
+  ov.innerHTML=`<div class="card-box"><h2>LAUF BEENDET</h2>
+    <p>Du hast den Lauf freiwillig nach ${run.round} Räumen beendet.</p>
+    <p style="color:var(--glow)">+0 RULE POINTS</p>
+    <button onclick="backTitle()">TITLE</button>
+    <button onclick="openMeta()">UPGRADES</button></div>`;
 }
 
 function renderRules(animate){
@@ -271,23 +460,77 @@ function renderRules(animate){
   }
 }
 
+function renderStatus(){
+  const el=document.getElementById('statusRow');
+  if(!el) return;
+  const parts=[];
+  if(hasRule('three_strikes')) parts.push('STRIKES: '+('●'.repeat(run.strikes||0)+'○'.repeat(Math.max(0,3-(run.strikes||0)))));
+  if(hasRule('clock')) parts.push('⏳ '+run.decisionsRemaining+' left');
+  if(run.debt>0) parts.push('DEBT: $'+Math.round(run.debt));
+  if(run.cartographer) parts.push(cartographerHint());
+  el.textContent=parts.join('   ');
+}
+function cartographerHint(){
+  if(run.map==='tower') return `NEXT: floor climb in ${5-(run.doorsOpened%5)}`;
+  if(run.map==='garden' && run.seed) return `NEXT: seed needs ${run.seed.required-run.seed.growth} more`;
+  if(run.map==='labyrinth'){ const left=3-((run.round)%3); return left===3?'NEXT: a fork ahead':`NEXT: fork in ${left}`; }
+  return run.doorsOpened>20 ? 'NEXT: danger rising' : 'NEXT: fairly stable';
+}
+
 function nextRound(){
   busy=false;
   run.round++;
   document.getElementById('round').textContent=run.round;
   document.getElementById('money').textContent=run.money;
+  if(hasRule('debt') && run.debt>0){
+    const pay=Math.round(run.debt);
+    run.money=Math.max(0, run.money-pay);
+    run.debt=0;
+    document.getElementById('money').textContent=run.money;
+  }
   callRuleHook('onRoomStart');
+  const map=MAP_DEFS[run.map];
+  if(map && map.onRoomStart) map.onRoomStart(run);
   renderRules(false);
+  renderStatus();
+  if(run.map==='labyrinth' && run.round%3===1 && run.round>1){
+    showPathChoice(); return;
+  }
+  renderDoors();
+}
+function showPathChoice(){
+  const ov=document.getElementById('overlay');
+  ov.classList.remove('hidden');
+  ov.innerHTML=`<div class="card-box"><h2>A FORK</h2><p>Two paths. Pick one for this room only.</p>
+    <button class="path-btn" id="pathRules">PATH OF RULES — a rule is guaranteed to appear this room</button>
+    <button class="path-btn" id="pathGold">PATH OF GOLD — +50% money this room</button></div>`;
+  document.getElementById('pathRules').onclick=()=>{ run.pathForceRule=true; ov.classList.add('hidden'); renderDoors(); };
+  document.getElementById('pathGold').onclick=()=>{ run.pathMult=1.5; ov.classList.add('hidden'); renderDoors(); };
+}
+function renderDoors(){
   const doorsEl=document.getElementById('doors');
   doorsEl.innerHTML='';
   const avail=DOOR_TYPES.filter(d=>unlockedTypes().includes(d.id));
+  const wantsMaster = run.keyFragments.a && run.keyFragments.b && run.keyFragments.c && !run.masterDoorUsed;
+  const masterSlot = wantsMaster ? Math.floor(Math.random()*6) : -1;
   for(let i=0;i<6;i++){
-    const d=avail[Math.floor(Math.random()*avail.length)];
+    const isMaster = i===masterSlot;
+    const d = isMaster ? {id:'master', cls:'d-angel', name:'MASTER'} : avail[Math.floor(Math.random()*avail.length)];
     const frame=document.createElement('div');
     frame.className='door-frame '+d.cls;
+    if(hasRule('no_safe_door') && !isMaster) frame.dataset.extra=(0.05+Math.random()*0.20).toFixed(2);
+    let hint='';
+    if(run.sixthSense && !isMaster){
+      const ch=endChanceFor(d.id);
+      const real = ch<0.15?'SAFE':(ch>0.35?'RISK':'UNKNOWN');
+      const shown = Math.random()<0.75 ? real : ['SAFE','RISK','UNKNOWN'][Math.floor(Math.random()*3)];
+      hint=`<div class="label" style="bottom:auto;top:5px;background:rgba(0,0,0,.6)">${shown}</div>`;
+    }
     frame.innerHTML=`
       <div class="door-inside"><div class="amt"></div><div class="msg"></div></div>
       <div class="door-leaf">
+        ${hint}
+        ${isMaster ? '<div class="halo" style="width:40px;height:14px"></div>' : ''}
         ${d.id==='eyes' ? `
           <div class="eyeimg" style="top:9%;left:18%;width:22px;height:16px;transform:rotate(-4deg)"></div>
           <div class="eyeimg" style="top:7%;right:14%;width:16px;height:12px;transform:rotate(9deg)"></div>
@@ -299,7 +542,7 @@ function nextRound(){
         ${d.id==='devil' ? '<div class="horn" style="left:24%"></div><div class="horn" style="right:24%"></div><div class="wing wl devilw"></div><div class="wing wr devilw"></div>' : ''}
         ${d.id==='angel' ? '<div class="halo"></div><div class="wing wl angelw"></div><div class="wing wr angelw"></div>' : ''}
         ${d.id==='flame' ? '<div class="flame-i" style="left:14%"></div><div class="flame-i" style="left:32%;height:17px;bottom:5%"></div><div class="flame-i" style="left:50%;height:20px;bottom:2%"></div><div class="flame-i" style="left:68%;height:17px;bottom:5%"></div><div class="flame-i" style="left:84%"></div>' : ''}
-        <div class="label">${d.name}</div>
+        ${run.blindfold && !isMaster ? '' : `<div class="label">${d.name}</div>`}
       </div>`;
     frame.onclick=()=>openDoor(d, frame);
     doorsEl.appendChild(frame);
@@ -311,19 +554,37 @@ function endChanceFor(type){
   run.rules.forEach(r=>{
     if(r.neg && (r.type===type || r.type==='all')) c+=r.mod;
     if(!r.neg && r.effect==='safedoor' && r.type===type) c-=r.mod;
+    if(!r.neg && r.effect==='safeall') c-=r.mod;
   });
+  const map=MAP_DEFS[run.map];
+  if(map && map.extraRisk) c+=map.extraRisk(run, type);
+  if(run.doorMastery && masteredType()===type) c-=0.05;
   return Math.min(Math.max(c,0.01),0.95);
+}
+function masteredType(){
+  const counts={};
+  run.doorHistory.forEach(id=>counts[id]=(counts[id]||0)+1);
+  let best=null,bestN=0;
+  Object.keys(counts).forEach(id=>{ if(counts[id]>bestN){bestN=counts[id]; best=id;} });
+  return best;
 }
 
 let busy=false;
 function openDoor(d, frame){
   if(busy) return;
-  if(ruleBlocksDoor(d)){ flashBlocked(frame); return; }
+  if(ruleBlocksDoor(d) && !run.skipValidateOnce){
+    if(run.ruleBreakerUses>0){ showRuleBreakerPrompt(d, frame); } else { flashBlocked(frame, getBlockingRule(d)); }
+    return;
+  }
+  run.skipValidateOnce=false;
   busy=true;
   const leaf=frame.querySelector('.door-leaf');
   const amtEl=frame.querySelector('.amt');
   const msgEl=frame.querySelector('.msg');
   leaf.classList.add('open');
+
+  const preSnap=snapshotRun();
+  const isMaster = d.id==='master';
 
   if(run.lastType===d.id) run.streak=(run.streak||0)+1; else run.streak=1;
   run.lastType=d.id;
@@ -331,52 +592,91 @@ function openDoor(d, frame){
   meta.stats.doorsByType[d.id]=(meta.stats.doorsByType[d.id]||0)+1;
   callRuleHook('onDoorSelected', d);
 
-  const chance=endChanceFor(d.id);
+  const extraRisk=parseFloat(frame.dataset.extra||0);
+  const chance=endChanceFor(d.id)+extraRisk;
   run.doorsOpened++;
   const streakRule=run.rules.find(r=>r.effect==='streak');
-  const streakDeath = streakRule && run.streak>=streakRule.mod;
-  const died = Math.random()<chance || streakDeath;
+  const streakDeath = !isMaster && streakRule && run.streak>=streakRule.mod;
+  const threeStrikesDeath = !isMaster && hasRule('three_strikes') && (run.strikes||0)>=3;
+
+  let died, echoActive=false;
+  if(isMaster){ died=false; }
+  else{
+    echoActive = hasRule('echo') && run.echoSource && run.echoSource.type!==d.id && Math.random()<0.3;
+    died = echoActive ? run.echoSource.died : Math.random()<chance;
+    died = died || streakDeath || threeStrikesDeath || run.clockExpired;
+  }
 
   setTimeout(()=>{
     let survived = !died;
-    if(died && run.shield>0){ run.shield--; survived=true; amtEl.textContent='🛡'; msgEl.textContent='SAVED'; }
+    if(died && run.shield>0 && !isMaster){
+      run.shield--; survived=true; amtEl.textContent='🛡'; msgEl.textContent='SAVED';
+      if(hasRule('three_strikes')) run.strikes=(run.strikes||0)+1;
+      if(hasRule('echo')) run.echoSource={type:d.id, died:true, gain:0};
+    }
     if(!survived){
+      const mapNow=MAP_DEFS[run.map];
+      if(mapNow && mapNow.onDoorResolved) mapNow.onDoorResolved(run, d, true);
+      if(run.secondChanceUses>0){ showSecondChancePrompt(preSnap, d, frame); return; }
       amtEl.textContent='☠'; msgEl.textContent='LOST';
       setTimeout(()=>runOver(), 550);
       return;
     }
-    if(!died){
-      const gain=Math.round((8+Math.random()*20)*(1+moneyBonus())*(run.moneyMult||1)*locationMult());
-      run.money+=gain;
-      amtEl.textContent='+$'+gain;
-      document.getElementById('money').textContent=run.money;
+    let gain=0;
+    if(isMaster){ gain=150; run.masterDoorUsed=true; run.keyFragments={a:false,b:false,c:false}; }
+    else if(!died){
+      gain = echoActive ? (run.echoSource.gain||0) :
+        Math.round((8+Math.random()*20)*(1+moneyBonus())*(run.moneyMult||1)*locationMult()*(run.pathMult||1)*(run.blindfold?1.5:1));
     }
-
-    setTimeout(()=>{
-      if(run.doorsOpened%run.ruleInterval===0){
-        let pool=rulePool();
-        if(run.forcePositive){ pool=pool.filter(r=>!r.neg); run.forcePositive=false; }
-        const newRule=pool[Math.floor(Math.random()*pool.length)];
-        if(newRule.effect==='bonusmoney'){ run.money+=newRule.mod; }
-        else if(newRule.effect==='remove' && run.rules.length){
-          run.rules.splice(Math.floor(Math.random()*run.rules.length),1);
-        } else {
-          run.rules.push(newRule);
-          if(newRule.effect==='fastrules') run.ruleInterval=7;
-          if(newRule.effect==='fastshop') run.shopInterval=7;
-        }
-        renderRules(true);
-        popup(`NEW RULE`, newRule.text, ()=>{
-          callRuleHook('onRoomEnd');
-          if(run.doorsOpened%run.shopInterval===0) openShop(); else nextRound();
-        });
-        return;
-      }
-      if(run.doorsOpened%run.shopInterval===0){ callRuleHook('onRoomEnd'); openShop(); return; }
-      callRuleHook('onRoomEnd');
-      nextRound();
-    }, 600);
+    finishGain(gain, d, amtEl, msgEl);
   }, 320);
+}
+
+function finishGain(gain, d, amtEl, msgEl){
+  const applyGain=(finalGain)=>{
+    run.money+=finalGain;
+    amtEl.textContent='+$'+finalGain;
+    document.getElementById('money').textContent=run.money;
+    if(hasRule('debt') && finalGain>15) run.debt=(run.debt||0)+finalGain*0.25;
+    if(hasRule('echo')) run.echoSource={type:d.id, died:false, gain:finalGain};
+    const mapNow=MAP_DEFS[run.map];
+    if(mapNow && mapNow.onDoorResolved) mapNow.onDoorResolved(run, d, false);
+    renderStatus();
+    setTimeout(proceedRoom, 600);
+  };
+  if(gain>0 && run.doubleDown && d.id!=='master'){ showDoubleDownPrompt(gain, applyGain); }
+  else { applyGain(gain); }
+}
+
+function proceedRoom(){
+  if(run.doorsOpened%run.ruleInterval===0 || run.pathForceRule){
+    const forcedRule=!!run.pathForceRule;
+    run.pathForceRule=false;
+    let pool=rulePool();
+    const actualRule = r => !r.effect || ['fastrules','fastshop','safedoor'].includes(r.effect);
+    if(run.forcePositive){ pool=pool.filter(r=>!r.neg && actualRule(r)); run.forcePositive=false; }
+    if(forcedRule){ pool=pool.filter(actualRule); }
+    if(!pool.length) pool=rulePool().filter(actualRule);
+    const newRule=pool[Math.floor(Math.random()*pool.length)];
+    if(newRule.effect==='bonusmoney'){ run.money+=newRule.mod; }
+    else if(newRule.effect==='remove' && run.rules.length){
+      run.rules.splice(Math.floor(Math.random()*run.rules.length),1);
+    } else {
+      run.rules.push(newRule);
+      if(newRule.effect==='fastrules') run.ruleInterval=7;
+      if(newRule.effect==='fastshop') run.shopInterval=7;
+      if(newRule.id==='clock') run.decisionsRemaining=20;
+    }
+    renderRules(true);
+    popup(`NEW RULE`, newRule.text, ()=>{
+      callRuleHook('onRoomEnd');
+      if(run.doorsOpened%run.shopInterval===0) openShop(); else nextRound();
+    });
+    return;
+  }
+  if(run.doorsOpened%run.shopInterval===0){ callRuleHook('onRoomEnd'); openShop(); return; }
+  callRuleHook('onRoomEnd');
+  nextRound();
 }
 
 function popup(title, text, onClose){
@@ -400,6 +700,16 @@ const CARD_DEFS=[
   {cls:'c7', name:'Guardian Halo', desc:'Survive your next death once (this run)', cost:70, apply:()=>run.shield=(run.shield||0)+1},
   {cls:'c8', name:"Devil's Bargain", desc:'+40% money, but all doors +10% end chance', cost:30, apply:()=>{run.moneyMult=(run.moneyMult||1)+0.4; run.rules.push({neg:true,type:'all',mod:0.1,text:"Devil's Bargain: all doors +10% end chance"});}},
   {cls:'c9', name:'Fourth Wall', desc:'Instantly gain 45 money', cost:25, apply:()=>run.money+=45},
+  {cls:'c2', name:'Second Chance', desc:'Undo your last door choice once, right after a loss', cost:50, apply:()=>run.secondChanceUses=(run.secondChanceUses||0)+1},
+  {cls:'c9', name:'Sixth Sense', desc:'Each door shows a hint: SAFE / RISK / UNKNOWN (~75% accurate)', cost:35, apply:()=>run.sixthSense=true},
+  {cls:'c7', name:'Key Fragment A', desc:'Collect all 3 fragments to unlock a guaranteed Master Door', cost:20, apply:()=>run.keyFragments.a=true},
+  {cls:'c7', name:'Key Fragment B', desc:'Collect all 3 fragments to unlock a guaranteed Master Door', cost:20, apply:()=>run.keyFragments.b=true},
+  {cls:'c7', name:'Key Fragment C', desc:'Collect all 3 fragments to unlock a guaranteed Master Door', cost:20, apply:()=>run.keyFragments.c=true},
+  {cls:'c3', name:'Double Down', desc:'After any win, choose to double it (50/50) or keep it', cost:40, apply:()=>run.doubleDown=true},
+  {cls:'c8', name:'Blindfold', desc:'Door labels are hidden, but normal winnings are +50%', cost:30, apply:()=>run.blindfold=true},
+  {cls:'c9', name:'Cartographer', desc:'See a short forecast about the next room in the status line', cost:25, apply:()=>run.cartographer=true},
+  {cls:'c1', name:'Rule Breaker', desc:'Ignore one blocking rule (like MEMORY) once per run', cost:45, apply:()=>run.ruleBreakerUses=(run.ruleBreakerUses||0)+1},
+  {cls:'c4', name:'Door Mastery', desc:'Your most-opened door type this run becomes 5% safer', cost:30, apply:()=>run.doorMastery=true},
 ];
 function openShop(){
   const ov=document.getElementById('overlay');
@@ -417,6 +727,8 @@ function openShop(){
 }
 
 function runOver(){
+  if(!run || run.over) return;
+  run.over=true;
   const points = run.rules.length*3 + run.round;
   meta.rp += points;
   meta.stats.runs++;
@@ -438,12 +750,7 @@ function renderMeta(){
   el.innerHTML='';
   el.appendChild(metaRow(`+2% Money per door (Lvl ${meta.moneyLvl}/${MONEY_MAX})`, meta.moneyLvl<MONEY_MAX?metaCost(meta.moneyLvl):null, ()=>{meta.moneyLvl++;}));
   el.appendChild(metaRow(`-0.5% base door end chance (Lvl ${meta.safeLvl}/${SAFE_MAX}) — now ${(baseEndChance()*100).toFixed(1)}%`, meta.safeLvl<SAFE_MAX?metaCost(meta.safeLvl):null, ()=>{meta.safeLvl++;}));
-  const next=LOCATIONS[meta.locationLvl+1];
-  if(next){
-    el.appendChild(metaRow(`Unlock ${next.name} (+${Math.round((next.mult-1)*100)}% money, new door types)`, next.cost, ()=>{meta.locationLvl++;}));
-  } else {
-    el.appendChild(metaRow(`${LOCATIONS[meta.locationLvl].name} — all locations unlocked`, null, ()=>{}));
-  }
+
 }
 function metaRow(label, cost, onBuy){
   const div=document.createElement('div');
