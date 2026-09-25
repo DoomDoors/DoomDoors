@@ -58,11 +58,8 @@ button{
 button:active{transform:translate(3px,3px);box-shadow:2px 2px 0 var(--glow)}
 button:disabled{opacity:.35;cursor:default;transform:none;box-shadow:5px 5px 0 var(--dim)}
 .hidden{display:none!important}
-#hud{display:flex;justify-content:space-between;align-items:center;font-size:10px;margin-bottom:18px;color:var(--dim)}
+#hud{display:flex;justify-content:space-between;font-size:10px;margin-bottom:18px;color:var(--dim)}
 #hud b{color:var(--ink)}
-.hud-left,.hud-right{display:flex;align-items:center;gap:8px}
-.hud-btn{margin:0;padding:7px 9px;font-size:9px;box-shadow:3px 3px 0 var(--glow)}
-#quitRun{margin-top:12px;font-size:9px;padding:9px 12px}
 #notebook{background:#fdf6e3;color:#3a2f1a;border:5px solid var(--ink);padding:16px 18px;margin-bottom:20px;box-shadow:5px 5px 0 rgba(0,0,0,.2);perspective:800px;text-align:left}
 .nb-header{font-size:9px;letter-spacing:1px;color:#9a865a;margin-bottom:10px;display:flex;justify-content:space-between}
 .nb-page{min-height:70px;display:flex;align-items:center}
@@ -116,16 +113,35 @@ button:disabled{opacity:.35;cursor:default;transform:none;box-shadow:5px 5px 0 v
 .c8{background:#2a0e3d;border-color:#c04dff;color:#fff}
 .c9{background:#e1fbff;border-color:#3fb2c9}
 .meta-row{display:flex;justify-content:space-between;align-items:center;border:2px solid var(--dim);padding:10px;margin:8px 0;font-size:9px;text-align:left}
+.tier-head{display:flex;justify-content:space-between;align-items:center;border:3px solid var(--ink);padding:10px;margin:16px 0 8px;background:#f7f7fb;text-align:left;font-size:9px}.tier-head b{font-size:10px}.tier-head button{margin-left:8px;white-space:nowrap}
 .meta-row div{flex:1}
-.map-card{display:flex;flex-direction:column;align-items:flex-start;border:3px solid var(--ink);background:var(--panel);padding:12px;margin:8px 0;text-align:left;cursor:pointer;box-shadow:4px 4px 0 rgba(0,0,0,.25)}
-.map-card b{font-size:10px;margin-bottom:6px}
-.map-card span{font-size:8px;color:var(--dim);line-height:1.6}
 .path-btn{display:block;width:100%;margin:8px 0;text-align:left}
 .blocked-badge{position:absolute;inset:0;z-index:5;display:flex;align-items:center;justify-content:center;
   background:rgba(120,10,20,.82);color:#fff;font-size:8px;text-align:center;padding:6px;line-height:1.6;
   animation:shake .4s}
 @keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-4px)}40%{transform:translateX(4px)}60%{transform:translateX(-3px)}80%{transform:translateX(3px)}}
+
+/* Level selection: intentionally simple, vertical and readable. */
+.map-card{display:flex;flex-direction:column;align-items:flex-start;width:100%;box-sizing:border-box;border:3px solid #262631;background:rgba(255,255,255,.94);padding:12px;margin:9px 0;text-align:left;cursor:pointer;box-shadow:4px 4px 0 rgba(0,0,0,.22);transition:transform .12s,box-shadow .12s}
+.map-card:hover{transform:translate(-2px,-2px);box-shadow:6px 6px 0 rgba(0,0,0,.28)}
+.map-card b{font-size:10px;margin-bottom:6px;color:#262631}
+.map-card span{font-size:8px;color:#6f6f7b;line-height:1.6}
+.map-card .map-tag{margin-top:7px;font-size:7px;color:#7c6bff;letter-spacing:1px}
+.title-art{position:relative;width:min(92vw,430px);height:145px;margin:0 auto 10px;overflow:hidden;border:3px solid #292936;background:linear-gradient(#151522,#25243a 58%,#11111a);box-shadow:0 0 0 4px rgba(0,0,0,.12),8px 8px 0 rgba(0,0,0,.2)}
+.title-art:before{content:"";position:absolute;left:8%;right:8%;bottom:-8px;height:76px;background:#0d0d14;clip-path:polygon(0 100%,0 56%,12% 44%,22% 60%,32% 35%,43% 57%,55% 30%,67% 54%,79% 38%,89% 58%,100% 42%,100% 100%);opacity:.95}
+.title-art:after{content:"";position:absolute;inset:0;background:repeating-linear-gradient(90deg,transparent 0 23px,rgba(255,255,255,.025) 24px),linear-gradient(180deg,rgba(124,107,255,.08),transparent 55%);pointer-events:none}
+.pixel-door{position:absolute;left:50%;top:20px;transform:translateX(-50%);width:86px;height:105px;border:5px solid #08080d;background:linear-gradient(90deg,#393946 0 10%,#171720 10% 90%,#393946 90%);box-shadow:inset 0 0 0 3px #555565,0 0 18px rgba(124,107,255,.28)}
+.pixel-door:before{content:"";position:absolute;left:16px;right:16px;top:12px;bottom:12px;border:3px solid #6c6c7c;background:linear-gradient(135deg,#22222d,#0c0c12);box-shadow:inset 0 0 0 3px #15151d}
+.pixel-door:after{content:"✦";position:absolute;left:50%;top:48%;transform:translate(-50%,-50%);font-size:22px;color:#8f83ff;text-shadow:0 0 8px #7c6bff}
+.title-spark{position:absolute;width:3px;height:3px;background:#9d95ff;box-shadow:0 0 8px #7c6bff;animation:floatSpark 2.8s infinite steps(4)}
+.title-spark.s1{left:16%;top:28%}.title-spark.s2{right:17%;top:38%;animation-delay:.7s}.title-spark.s3{left:27%;top:62%;animation-delay:1.3s}.title-spark.s4{right:29%;top:21%;animation-delay:1.9s}
+@keyframes floatSpark{0%,100%{opacity:.15;transform:translateY(0)}50%{opacity:1;transform:translateY(-8px)}}
+#screen-title h1{text-shadow:4px 4px 0 #1b1b24,0 0 18px rgba(124,107,255,.35);letter-spacing:2px}
+#screen-title .sub{margin-bottom:12px;opacity:.85}
 .small{font-size:8px;color:var(--dim)}
+
+/* ---------- progression visuals ---------- */
+.achievement-box{border:3px solid var(--dim);padding:10px;margin-top:12px;text-align:left}.achievement{display:flex;gap:8px;align-items:center;border-bottom:1px solid #bbb;padding:7px 0;font-size:8px}.achievement:last-child{border-bottom:0}.achievement.locked{opacity:.38}.achievement .ach-icon{width:24px;text-align:center;font-size:14px}
 </style>
 </head>
 <body>
@@ -135,6 +151,10 @@ button:disabled{opacity:.35;cursor:default;transform:none;box-shadow:5px 5px 0 v
 <div class="chain right"></div>
 
 <div id="screen-title">
+  <div class="title-art">
+    <div class="pixel-door"></div>
+    <i class="title-spark s1"></i><i class="title-spark s2"></i><i class="title-spark s3"></i><i class="title-spark s4"></i>
+  </div>
   <div class="candle"></div>
   <h1>DoomDoors</h1>
   <div class="rainbow-bar"></div>
@@ -144,20 +164,20 @@ button:disabled{opacity:.35;cursor:default;transform:none;box-shadow:5px 5px 0 v
 </div>
 
 <div id="screen-mapselect" class="hidden">
-  <h1 style="font-size:20px">CHOOSE A PLACE</h1>
+  <h1 style="font-size:20px">CHOOSE A LEVEL</h1>
+  <div class="sub">Pick a place. Each level changes the run in a different way.</div>
   <div id="mapList"></div>
   <button onclick="backTitle()">BACK</button>
 </div>
 
 <div id="screen-game" class="hidden">
-  <div id="hud"><div class="hud-left"><span>ROOM <b id="round">0</b></span><span>$<b id="money">0</b></span></div><div class="hud-right"><button class="hud-btn" onclick="showInfo()">i</button></div></div>
+  <div id="hud"><span>ROOM <b id="round">0</b></span><span>$<b id="money">0</b></span></div>
   <div id="statusRow" class="small" style="margin-bottom:10px;min-height:10px"></div>
   <div id="notebook">
     <div class="nb-header"><span>RULE BOOK</span><span><span id="ruleCount">0</span> pages</span></div>
     <div class="nb-page"><div class="nb-page-inner" id="rulePageInner">No rule yet.</div></div>
   </div>
   <div id="doors"></div>
-  <button id="quitRun" onclick="requestEndRun()">BEENDEN</button>
 </div>
 
 <div id="screen-meta" class="hidden">
@@ -172,13 +192,17 @@ button:disabled{opacity:.35;cursor:default;transform:none;box-shadow:5px 5px 0 v
 
 <script>
 // ---------- persistent meta state ----------
-let meta = {rp:0, moneyLvl:0, safeLvl:0};
+let meta = {rp:0, upgrades:{}, tier2:false, tier3:false, tier4:false};
 try{ const s=localStorage.getItem('hexdoor_meta'); if(s) meta=JSON.parse(s); }catch(e){}
 function saveMeta(){ try{ localStorage.setItem('hexdoor_meta', JSON.stringify(meta)); }catch(e){} }
 
-const MONEY_MAX=10, SAFE_MAX=10; // 10 purchases each
-function moneyBonus(){ return meta.moneyLvl*0.02; }        // +2% per lvl
-function baseEndChance(){ return Math.max(0.10 - meta.safeLvl*0.005, 0.02); } // -0.5%/lvl from 10%
+// Permanent upgrade system — 11 one-time upgrades in four tiers.
+if(!meta.upgrades) meta.upgrades={};
+if(meta.moneyLvl>0) meta.upgrades.fortune=true; // migrate older saves
+if(meta.safeLvl>0) meta.upgrades.iron_will=true; // migrate older saves
+function hasMetaUpgrade(id){ return !!meta.upgrades[id]; }
+function moneyBonus(){ return hasMetaUpgrade('fortune') ? 0.05 : 0; }
+function baseEndChance(){ return Math.max(0.10 - (hasMetaUpgrade('iron_will') ? 0.015 : 0), 0.025); }
 
 // ---------- statistics (persisted, old saves get safe defaults) ----------
 if(!meta.stats) meta.stats = {runs:0, doorsByType:{}, positiveEvents:0, negativeEvents:0};
@@ -207,15 +231,13 @@ function hasRule(id){ return run.rules.some(r=>r.id===id); }
 function snapshotRun(){
   return {money:run.money, doorsOpened:run.doorsOpened, streak:run.streak, lastType:run.lastType,
     debt:run.debt, strikes:run.strikes, decisionsRemaining:run.decisionsRemaining, clockExpired:run.clockExpired,
-    echoSource:run.echoSource, mirrorBias:{...(run.mirrorBias||{})},
-    seedGrowth: run.seed?run.seed.growth:undefined, seedRequired: run.seed?run.seed.required:undefined,
+    echoSource:run.echoSource,
     floor:run.floor, pathMult:run.pathMult, pathForceRule:run.pathForceRule};
 }
 function restoreRun(s, doorTypeId){
   run.money=s.money; run.doorsOpened=s.doorsOpened; run.streak=s.streak; run.lastType=s.lastType;
   run.debt=s.debt; run.strikes=s.strikes; run.decisionsRemaining=s.decisionsRemaining; run.clockExpired=s.clockExpired;
-  run.echoSource=s.echoSource; run.mirrorBias=s.mirrorBias;
-  if(run.seed){ run.seed.growth=s.seedGrowth; run.seed.required=s.seedRequired; }
+  run.echoSource=s.echoSource;
   run.floor=s.floor; run.pathMult=s.pathMult; run.pathForceRule=s.pathForceRule;
   run.doorHistory.pop();
   meta.stats.doorsByType[doorTypeId]=Math.max(0,(meta.stats.doorsByType[doorTypeId]||1)-1);
@@ -233,10 +255,10 @@ function showRuleBreakerPrompt(d, frame){
 function showSecondChancePrompt(preSnap, d, frame){
   const ov=document.getElementById('overlay');
   ov.classList.remove('hidden');
-  ov.innerHTML=`<div class="card-box"><h2>YOU LOST...</h2><p>Use your Second Chance to undo this door and try again?</p>
+  ov.innerHTML=`<div class="card-box"><h2>YOU LOST...</h2><p>Use a rewind to undo this door and try again?</p>
     <button id="scYes">UNDO (1 USE)</button> <button id="scNo">ACCEPT LOSS</button></div>`;
   document.getElementById('scYes').onclick=()=>{
-    run.secondChanceUses--;
+    if(run.secondChanceUses>0) run.secondChanceUses--; else run.rewindUses--;
     restoreRun(preSnap, d.id);
     ov.classList.add('hidden');
     frame.querySelector('.door-leaf').classList.remove('open');
@@ -273,6 +295,47 @@ function flashBlocked(frame, ruleObj){
   setTimeout(()=>badge.remove(), 750);
 }
 
+// All door types are available from the beginning.
+function locationMult(){ return 1; }
+function unlockedTypes(){ return DOOR_TYPES.map(d=>d.id); }
+
+// ---------- levels / maps ----------
+// These are deliberately lightweight level modifiers, not a node/path graph.
+const MAPS=[
+  {id:'endless_hall', name:'The Endless Hall', desc:'No real end — difficulty quietly rises the longer you survive.', tag:'SURVIVAL'},
+  {id:'tower', name:'The Tower', desc:'Every 5 doors you climb a floor. Each floor can add a new law.', tag:'CLIMB'},
+  {id:'labyrinth', name:'The Labyrinth', desc:'Every 3 rooms you choose between a rule-focused path and a gold-focused path.', tag:'CHOICE'},
+  {id:'mirror', name:'The Mirror', desc:'The fate of one door type can echo onto the next room.', tag:'ECHO'},
+  {id:'garden', name:'The Garden', desc:'Grow a seed through rooms. When it blooms, you receive a larger payout.', tag:'REWARD'},
+];
+const TOWER_LAWS=['memory','echo','clock'];
+const MAP_DEFS={
+  endless_hall:{ extraRisk(run){ const n=run.doorsOpened; if(n>30) return 0.09; if(n>20) return 0.06; if(n>10) return 0.04; if(n>5) return 0.02; return 0; } },
+  tower:{ onRoomStart(run){
+    const floor=Math.floor(run.doorsOpened/5)+1;
+    if(floor!==run.floor){
+      run.floor=floor;
+      const tmpl=TOWER_LAWS[floor-2] && phase2Rules().find(r=>r.id===TOWER_LAWS[floor-2]);
+      if(tmpl && !hasRule(tmpl.id)){ run.rules.push(tmpl); renderRules(true); popup('FLOOR '+floor, 'A new law takes hold:\n'+tmpl.text, ()=>{}); }
+    }
+  }},
+  mirror:{
+    extraRisk(run,type){ return (run.mirrorBias && run.mirrorBias[type]) || 0; },
+    onDoorResolved(run,door,died){ run.mirrorBias=run.mirrorBias||{}; run.mirrorBias[door.id]=died?0.15:-0.05; }
+  },
+  garden:{ onRoomStart(run){
+    run.seed=run.seed||{growth:0,required:3};
+    run.seed.growth++;
+    if(run.seed.growth>=run.seed.required){
+      const bonus=Math.round(20+run.seed.required*8);
+      run.money+=bonus;
+      run.seed.growth=0; run.seed.required+=2;
+      popup('SEED BLOOMS','Your seed blooms: +$'+bonus,()=>{});
+    }
+  }},
+  labyrinth:{ onRoomStart(run){ if(run.round%3!==1) run.pathMult=1; }}
+};
+
 // ---------- door types ----------
 const DOOR_TYPES=[
  {id:'blue',cls:'d-blue',name:'Blue'},
@@ -285,10 +348,6 @@ const DOOR_TYPES=[
  {id:'joker',cls:'d-joker',name:'Joker'},
  {id:'flame',cls:'d-flame',name:'Flame'},
 ];
-
-function locationMult(){ return 1; }
-function unlockedTypes(){ return DOOR_TYPES.map(d=>d.id); }
-
 
 // ---------- Phase 2 rules: use the generic hook interface ----------
 function phase2Rules(){
@@ -327,50 +386,33 @@ function randomStarterRule(){
   return picks[Math.floor(Math.random()*picks.length)];
 }
 
-// ---------- Phase 4: maps (lightweight modifiers on the existing room loop,
-// not a full node-graph rewrite — see chat for why) ----------
-const MAPS=[
-  {id:'endless_hall', name:'The Endless Hall', desc:'No real end — difficulty quietly rises the longer you survive.'},
-  {id:'tower', name:'The Tower', desc:'Every 5 doors you climb a floor. Each floor permanently locks in a new law.'},
-  {id:'labyrinth', name:'The Labyrinth', desc:'Every 3 rooms you pick a path: more rules, or more gold.'},
-  {id:'mirror', name:'The Mirror', desc:'What happens to one door type echoes onto the next room\'s matching door.'},
-  {id:'garden', name:'The Garden', desc:'Grow a seed each room. Let it bloom for a big payout.'},
+// ---------- run-wide progression ----------
+// ---------- achievements ----------
+const ACHIEVEMENTS=[
+ {id:'first_run',icon:'🏁',name:'First Steps',desc:'Complete your first run.',check:()=>meta.stats.runs>=1},
+ {id:'ten_doors',icon:'🚪',name:'Door Tourist',desc:'Open 10 doors in one run.',check:()=>run.doorsOpened>=10},
+ {id:'twenty_doors',icon:'🔥',name:'Still Here',desc:'Open 20 doors in one run.',check:()=>run.doorsOpened>=20},
+ {id:'rule_collector',icon:'📖',name:'Rule Collector',desc:'Carry 5 rules at once.',check:()=>run.rules.length>=5},
+ {id:'rich',icon:'💰',name:'Treasure Room',desc:'Hold $100 during a run.',check:()=>run.money>=100},
+ {id:'all_doors',icon:'🗝️',name:'Door Collector',desc:'Open every available door type at least once across your runs.',check:()=>DOOR_TYPES.every(d=>(meta.stats.doorsByType[d.id]||0)>0)},
+ {id:'boss',icon:'👹',name:'Boss Breaker',desc:'Defeat a mini-boss.',check:()=>run.bossesDefeated>=1},
+ {id:'boss3',icon:'👑',name:'Boss Hunter',desc:'Defeat 3 mini-bosses in one run.',check:()=>run.bossesDefeated>=3},
+ {id:'evolve',icon:'✨',name:'Evolution',desc:'Evolve a door to level 3 in one run.',check:()=>Object.values(run.doorEvolution||{}).some(v=>v>=3)},
+ {id:'master',icon:'🌟',name:'Master Key',desc:'Use a Master Door.',check:()=>run.masterDoorUsed},
+ {id:'shop',icon:'🛒',name:'Prepared',desc:'Buy 3 shop cards in one run.',check:()=>run.shopBuys>=3},
+ {id:'clean',icon:'🛡️',name:'No Looking Back',desc:'Reach 10 doors without using a shield.',check:()=>run.doorsOpened>=10 && !run.usedShield}
 ];
-const TOWER_LAWS=['memory','echo','clock'];
-const MAP_DEFS={
-  endless_hall:{ extraRisk(run){ const n=run.doorsOpened;
-    if(n>30) return 0.09; if(n>20) return 0.06; if(n>10) return 0.04; if(n>5) return 0.02; return 0; } },
-  tower:{
-    onRoomStart(run){
-      const floor=Math.floor(run.doorsOpened/5)+1;
-      if(floor!==run.floor){
-        run.floor=floor;
-        const tmpl=TOWER_LAWS[floor-2] && phase2Rules().find(r=>r.id===TOWER_LAWS[floor-2]);
-        if(tmpl && !hasRule(tmpl.id)){
-          run.rules.push(tmpl); renderRules(true);
-          popup('FLOOR '+floor, 'A new law takes hold:\n'+tmpl.text, ()=>{});
-        }
-      }
-    }
-  },
-  mirror:{
-    extraRisk(run, type){ return (run.mirrorBias && run.mirrorBias[type]) || 0; },
-    onDoorResolved(run, door, died){ run.mirrorBias=run.mirrorBias||{}; run.mirrorBias[door.id]=died?0.15:-0.05; }
-  },
-  garden:{
-    onRoomStart(run){
-      run.seed=run.seed||{growth:0, required:3};
-      run.seed.growth++;
-      if(run.seed.growth>=run.seed.required){
-        const bonus=Math.round(20+run.seed.required*8);
-        run.money+=bonus;
-        run.seed.growth=0; run.seed.required+=2;
-        popup('SEED BLOOMS', 'Your seed blooms: +$'+bonus, ()=>{});
-      }
-    }
-  },
-  labyrinth:{ onRoomStart(run){ if(run.round%3!==1) run.pathMult=1; } }
-};
+if(!meta.achievements) meta.achievements={};
+function checkAchievements(){
+  ACHIEVEMENTS.forEach(a=>{ if(!meta.achievements[a.id] && a.check()) meta.achievements[a.id]=Date.now(); });
+  saveMeta();
+}
+function renderAchievements(){
+  const unlocked=Object.keys(meta.achievements||{}).length;
+  return `<div class="achievement-box"><b>ACHIEVEMENTS — ${unlocked}/${ACHIEVEMENTS.length}</b>${ACHIEVEMENTS.map(a=>{
+    const ok=!!meta.achievements[a.id]; return `<div class="achievement ${ok?'':'locked'}"><div class="ach-icon">${ok?a.icon:'?'}</div><div><b>${ok?a.name:'???'}</b><br><span class="small">${a.desc}</span></div></div>`;
+  }).join('')}</div>`;
+}
 
 // ---------- run state ----------
 let run=null;
@@ -380,22 +422,23 @@ function showMapSelect(){
   MAPS.forEach(m=>{
     const div=document.createElement('div');
     div.className='map-card';
-    div.innerHTML=`<b>${m.name}</b><span>${m.desc}</span>`;
+    div.innerHTML=`<b>${m.name}</b><span>${m.desc}</span><div class="map-tag">${m.tag}</div>`;
     div.onclick=()=>startRun(m.id);
     el.appendChild(div);
   });
   show('screen-mapselect');
 }
 function startRun(mapId){
-  run={round:0, money:0, rules:[], doorsOpened:0, over:false, moneyMult:1, shield:0,
-       ruleInterval:5, shopInterval:10, lastType:null, streak:0, doorHistory:[],
-       upgrades:[], discoveredSecrets:[], strikes:0, debt:0, decisionsRemaining:null,
-       clockExpired:false, echoSource:null, map:mapId, floor:1, mirrorBias:{},
-       seed:{growth:0,required:3}, pathMult:1,
-       secondChanceUses:0, sixthSense:false, keyFragments:{a:false,b:false,c:false},
-       masterDoorUsed:false, doubleDown:false, blindfold:false, cartographer:false,
-       ruleBreakerUses:0, doorMastery:false, skipValidateOnce:false};
+  run={round:0, money:meta.upgrades.deep_pockets?20:0, rules:[], doorsOpened:0, over:false, moneyMult:1, shield:meta.upgrades.guardian_sigil?1:0,
+       ruleInterval:meta.upgrades.patient_mind?6:5, shopInterval:10, lastType:null, streak:0, doorHistory:[],
+       upgrades:[], discoveredSecrets:[], strikes:0, debt:0, decisionsRemaining:null, clockExpired:false, echoSource:null,
+       map:mapId, floor:1, mirrorBias:{}, seed:{growth:0,required:3}, pathMult:1,
+       secondChanceUses:meta.upgrades.second_hand?1:0, rewindUses:0, sixthSense:!!meta.upgrades.sixth_sense,
+       keyFragments:{a:false,b:false,c:false}, masterDoorUsed:false, doubleDown:false, blindfold:false, cartographer:false,
+       ruleBreakerUses:0, doorMastery:!!meta.upgrades.door_mastery, skipValidateOnce:false, masterKeyUses:meta.upgrades.keysmith?1:0,
+       shopDiscount:!!meta.upgrades.merchant_seal, shopBuys:0, bossesDefeated:0, doorEvolution:{}, usedShield:false};
   run.rules.push(randomStarterRule());
+  if(meta.upgrades.rule_scholar){ const p=rulePool().filter(r=>!r.neg); if(p.length) run.rules.push(p[Math.floor(Math.random()*p.length)]); }
   show('screen-game');
   nextRound();
 }
@@ -405,45 +448,6 @@ function openMeta(){ renderMeta(); show('screen-meta'); }
 function show(id){
   ['screen-title','screen-mapselect','screen-game','screen-meta'].forEach(s=>document.getElementById(s).classList.toggle('hidden', s!==id));
   document.getElementById('overlay').classList.add('hidden');
-}
-
-function showInfo(){
-  const ov=document.getElementById('overlay');
-  ov.classList.remove('hidden');
-  ov.innerHTML=`<div class="card-box"><h2>SPIELREGELN</h2>
-    <p><b>Ziel:</b> Wähle in jedem Raum eine Tür. Eine falsche Tür kann den Lauf beenden.</p>
-    <p><b>Türen:</b> Öffne eine Tür und versuche, die jeweilige Gefahr zu überleben. Deine aktiven Regeln können Türen verändern oder blockieren.</p>
-    <p><b>Regeln:</b> Neue Regeln kommen im Verlauf des Levels dazu und bleiben für den aktuellen Lauf aktiv. Sie werden im RULE BOOK angezeigt.</p>
-    <p><b>Geld:</b> Überlebte Türen bringen Geld. Im Shop kannst du es für Vorteile in diesem Lauf ausgeben.</p>
-    <p><b>Fortschritt:</b> Neue Regeln erscheinen normalerweise alle 5 geöffneten Türen; der Shop normalerweise alle 10.</p>
-    <p><b>RULE POINTS:</b> Wenn du einen Lauf normal beendest, erhältst du RULE POINTS abhängig von deinem Fortschritt.</p>
-    <p><b>BEENDEN:</b> Du kannst einen Lauf jederzeit freiwillig beenden. Ein freiwillig beendeter Lauf gibt <b>0 RULE POINTS</b>.</p>
-    <button id="closeInfo">SCHLIESSEN</button></div>`;
-  document.getElementById('closeInfo').onclick=()=>ov.classList.add('hidden');
-}
-function requestEndRun(){
-  if(!run || run.over) return;
-  const ov=document.getElementById('overlay');
-  ov.classList.remove('hidden');
-  ov.innerHTML=`<div class="card-box"><h2>LAUF BEENDEN?</h2>
-    <p>Wenn du jetzt freiwillig beendest, erhältst du <b>0 RULE POINTS</b>.</p>
-    <button id="endYes">BEENDEN</button>
-    <button id="endNo">WEITERSPIELEN</button></div>`;
-  document.getElementById('endYes').onclick=()=>endRunVoluntarily();
-  document.getElementById('endNo').onclick=()=>ov.classList.add('hidden');
-}
-function endRunVoluntarily(){
-  if(!run || run.over) return;
-  run.over=true;
-  meta.stats.runs++;
-  saveMeta();
-  const ov=document.getElementById('overlay');
-  ov.classList.remove('hidden');
-  ov.innerHTML=`<div class="card-box"><h2>LAUF BEENDET</h2>
-    <p>Du hast den Lauf freiwillig nach ${run.round} Räumen beendet.</p>
-    <p style="color:var(--glow)">+0 RULE POINTS</p>
-    <button onclick="backTitle()">TITLE</button>
-    <button onclick="openMeta()">UPGRADES</button></div>`;
 }
 
 function renderRules(animate){
@@ -473,7 +477,7 @@ function renderStatus(){
 function cartographerHint(){
   if(run.map==='tower') return `NEXT: floor climb in ${5-(run.doorsOpened%5)}`;
   if(run.map==='garden' && run.seed) return `NEXT: seed needs ${run.seed.required-run.seed.growth} more`;
-  if(run.map==='labyrinth'){ const left=3-((run.round)%3); return left===3?'NEXT: a fork ahead':`NEXT: fork in ${left}`; }
+  if(run.map==='labyrinth'){ const left=3-(run.round%3); return left===3?'NEXT: a fork ahead':`NEXT: fork in ${left}`; }
   return run.doorsOpened>20 ? 'NEXT: danger rising' : 'NEXT: fairly stable';
 }
 
@@ -493,9 +497,7 @@ function nextRound(){
   if(map && map.onRoomStart) map.onRoomStart(run);
   renderRules(false);
   renderStatus();
-  if(run.map==='labyrinth' && run.round%3===1 && run.round>1){
-    showPathChoice(); return;
-  }
+  if(run.map==='labyrinth' && run.round%3===1 && run.round>1){ showPathChoice(); return; }
   renderDoors();
 }
 function showPathChoice(){
@@ -530,6 +532,7 @@ function renderDoors(){
       <div class="door-inside"><div class="amt"></div><div class="msg"></div></div>
       <div class="door-leaf">
         ${hint}
+        ${!isMaster ? evolutionLabel(d.id) : ''}
         ${isMaster ? '<div class="halo" style="width:40px;height:14px"></div>' : ''}
         ${d.id==='eyes' ? `
           <div class="eyeimg" style="top:9%;left:18%;width:22px;height:16px;transform:rotate(-4deg)"></div>
@@ -549,6 +552,13 @@ function renderDoors(){
   }
 }
 
+function doorEvolutionLevel(type){
+  const n=(run.doorEvolution&&run.doorEvolution[type])||0;
+  return n>=12?3:n>=7?2:n>=3?1:0;
+}
+function evolutionReduction(type){ return doorEvolutionLevel(type)*0.02; }
+function evolutionLabel(type){ const l=doorEvolutionLevel(type); return l?`<div class="evo-badge">EVOLUTION ${l}</div>`:''; }
+
 function endChanceFor(type){
   let c=baseEndChance();
   run.rules.forEach(r=>{
@@ -557,8 +567,9 @@ function endChanceFor(type){
     if(!r.neg && r.effect==='safeall') c-=r.mod;
   });
   const map=MAP_DEFS[run.map];
-  if(map && map.extraRisk) c+=map.extraRisk(run, type);
+  if(map && map.extraRisk) c+=map.extraRisk(run,type);
   if(run.doorMastery && masteredType()===type) c-=0.05;
+  c-=evolutionReduction(type);
   return Math.min(Math.max(c,0.01),0.95);
 }
 function masteredType(){
@@ -590,6 +601,11 @@ function openDoor(d, frame){
   run.lastType=d.id;
   run.doorHistory.push(d.id);
   meta.stats.doorsByType[d.id]=(meta.stats.doorsByType[d.id]||0)+1;
+  if(!isMaster){
+    run.doorEvolution[d.id]=(run.doorEvolution[d.id]||0)+1;
+    const evo=doorEvolutionLevel(d.id);
+    if(evo && run.doorEvolution[d.id]===({1:3,2:7,3:12}[evo])) run.pendingEvolution={type:d.name,level:evo};
+  }
   callRuleHook('onDoorSelected', d);
 
   const extraRisk=parseFloat(frame.dataset.extra||0);
@@ -610,15 +626,17 @@ function openDoor(d, frame){
   setTimeout(()=>{
     let survived = !died;
     if(died && run.shield>0 && !isMaster){
-      run.shield--; survived=true; amtEl.textContent='🛡'; msgEl.textContent='SAVED';
+      run.shield--; run.usedShield=true; survived=true; amtEl.textContent='🛡'; msgEl.textContent='SAVED';
       if(hasRule('three_strikes')) run.strikes=(run.strikes||0)+1;
       if(hasRule('echo')) run.echoSource={type:d.id, died:true, gain:0};
     }
     if(!survived){
-      const mapNow=MAP_DEFS[run.map];
-      if(mapNow && mapNow.onDoorResolved) mapNow.onDoorResolved(run, d, true);
-      if(run.secondChanceUses>0){ showSecondChancePrompt(preSnap, d, frame); return; }
+      if(run.masterKeyUses>0){
+        run.masterKeyUses--; survived=true; amtEl.textContent='🗝'; msgEl.textContent='MASTER KEY';
+      } else if(run.secondChanceUses>0 || run.rewindUses>0){ showSecondChancePrompt(preSnap, d, frame); return; }
       amtEl.textContent='☠'; msgEl.textContent='LOST';
+      const mapNow=MAP_DEFS[run.map];
+      if(mapNow && mapNow.onDoorResolved) mapNow.onDoorResolved(run,d,true);
       setTimeout(()=>runOver(), 550);
       return;
     }
@@ -640,23 +658,61 @@ function finishGain(gain, d, amtEl, msgEl){
     if(hasRule('debt') && finalGain>15) run.debt=(run.debt||0)+finalGain*0.25;
     if(hasRule('echo')) run.echoSource={type:d.id, died:false, gain:finalGain};
     const mapNow=MAP_DEFS[run.map];
-    if(mapNow && mapNow.onDoorResolved) mapNow.onDoorResolved(run, d, false);
+    if(mapNow && mapNow.onDoorResolved) mapNow.onDoorResolved(run,d,false);
     renderStatus();
-    setTimeout(proceedRoom, 600);
+    checkAchievements();
+    setTimeout(()=>{
+      if(run.pendingEvolution){ const e=run.pendingEvolution; run.pendingEvolution=null; popup('DOOR EVOLVED', `${e.type} has reached EVOLUTION ${e.level}. Its doors are now a little safer.`, ()=>proceedRoom()); }
+      else proceedRoom();
+    }, 600);
   };
   if(gain>0 && run.doubleDown && d.id!=='master'){ showDoubleDownPrompt(gain, applyGain); }
   else { applyGain(gain); }
 }
 
+function openMiniBoss(after){
+  const bosses=[
+    {name:'THE IRON KEEPER',desc:'The Keeper demands a toll. Pay $35, or challenge the gate.',
+      safe:()=>{ if(run.money>=35){run.money-=35; return 'You paid the toll and pass safely.'} return null; },
+      challenge:()=>Math.random()<0.6, reward:55},
+    {name:'THE RULE EATER',desc:'It will consume one negative rule — but only if you dare to bargain.',
+      safe:()=>{ const neg=run.rules.find(r=>r.neg); if(neg){run.rules.splice(run.rules.indexOf(neg),1); return 'A negative rule was eaten.'} return null; },
+      challenge:()=>Math.random()<0.5, reward:65},
+    {name:'THE MIRROR KNIGHT',desc:'Defeat your reflection for a large reward, or leave with a small safe payout.',
+      safe:()=>{run.money+=20; return 'You take the safe reward.'}, challenge:()=>Math.random()<0.55, reward:90}
+  ];
+  const b=bosses[run.bossesDefeated%bosses.length];
+  const ov=document.getElementById('overlay'); ov.classList.remove('hidden');
+  ov.innerHTML=`<div class="card-box boss-card"><h2>👹 ${b.name}</h2><p>${b.desc}</p>
+    <button class="boss-choice" id="bossSafe">SAFE CHOICE</button>
+    <button class="boss-choice" id="bossFight">CHALLENGE THE BOSS</button></div>`;
+  const finish=()=>{ checkAchievements(); after&&after(); };
+  document.getElementById('bossSafe').onclick=()=>{
+    const msg=b.safe();
+    if(msg===null){ popup('NO WAY OUT','You cannot afford the safe option. Challenge the boss instead.',()=>{}); return; }
+    run.bossesDefeated++; document.getElementById('money').textContent=run.money;
+    popup('BOSS PASSED',msg,finish);
+  };
+  document.getElementById('bossFight').onclick=()=>{
+    const win=b.challenge();
+    if(win){ run.bossesDefeated++; run.money+=b.reward; document.getElementById('money').textContent=run.money; popup('BOSS DEFEATED',`You earned $${b.reward}.`,finish); }
+    else if(run.shield>0){ run.shield--; run.usedShield=true; run.bossesDefeated++; popup('SAVED', 'Your shield absorbs the boss attack. The gate opens.', finish); }
+    else { popup('BOSS WINS','The boss defeats you. The run is over.',()=>runOver()); }
+  };
+}
+
 function proceedRoom(){
+  if(run.doorsOpened>0 && run.doorsOpened>=run.nextBossAt){
+    run.nextBossAt+=15;
+    openMiniBoss(()=>{
+      if(run.doorsOpened%run.shopInterval===0) openShop(); else nextRound();
+    });
+    return;
+  }
   if(run.doorsOpened%run.ruleInterval===0 || run.pathForceRule){
-    const forcedRule=!!run.pathForceRule;
     run.pathForceRule=false;
     let pool=rulePool();
-    const actualRule = r => !r.effect || ['fastrules','fastshop','safedoor'].includes(r.effect);
-    if(run.forcePositive){ pool=pool.filter(r=>!r.neg && actualRule(r)); run.forcePositive=false; }
-    if(forcedRule){ pool=pool.filter(actualRule); }
-    if(!pool.length) pool=rulePool().filter(actualRule);
+    if(run.forcePositive){ pool=pool.filter(r=>!r.neg); run.forcePositive=false; }
     const newRule=pool[Math.floor(Math.random()*pool.length)];
     if(newRule.effect==='bonusmoney'){ run.money+=newRule.mod; }
     else if(newRule.effect==='remove' && run.rules.length){
@@ -690,8 +746,9 @@ function popup(title, text, onClose){
 const CARD_DEFS=[
   {cls:'c1', name:'Steel Hinges', desc:'-10% end chance on all doors (this run)', cost:40, apply:()=>run.rules.push({neg:false,effect:'safeall',mod:0.1,text:'Steel Hinges: -10% end chance everywhere'})},
   {cls:'c2', name:'Lucky Coin', desc:'+25% money from doors (this run)', cost:35, apply:()=>run.moneyMult=(run.moneyMult||1)+0.25},
-  {cls:'c3', name:'Old Map', desc:'Reveals a door type before choosing (flavor)', cost:20, apply:()=>{}},
   {cls:'c4', name:'Rabbit Foot', desc:'Instantly gain 30 money', cost:15, apply:()=>run.money+=30},
+  {cls:'c7', name:'Master Key', desc:'Your next failed door is ignored once', cost:60, apply:()=>run.masterKeyUses=(run.masterKeyUses||0)+1},
+  {cls:'c5', name:'Rewind Shard', desc:'Undo one failed door choice', cost:50, apply:()=>run.rewindUses=(run.rewindUses||0)+1},
   {cls:'c5', name:'Cursed Key', desc:'Remove your riskiest rule', cost:55, apply:()=>{
     let worst=null; run.rules.forEach(r=>{if(r.neg&&(!worst||r.mod>worst.mod))worst=r;});
     if(worst) run.rules.splice(run.rules.indexOf(worst),1);
@@ -716,19 +773,20 @@ function openShop(){
   ov.classList.remove('hidden');
   const picks=[...CARD_DEFS].sort(()=>Math.random()-0.5).slice(0,3);
   ov.innerHTML=`<div class="card-box"><h2>SHOP — $${run.money}</h2><p>Buy permanent boosts for this run.</p>
-    <div class="shopcards">${picks.map((c,i)=>`<div class="shopcard ${c.cls}" data-i="${i}"><b>${c.name}</b>${c.desc}<br><br>Cost: $${c.cost}</div>`).join('')}</div>
+    <div class="shopcards">${picks.map((c,i)=>`<div class="shopcard ${c.cls}" data-i="${i}"><b>${c.name}</b>${c.desc}<br><br>Cost: $${Math.max(1,Math.round(c.cost*(run.shopDiscount?0.9:1)))}</div>`).join('')}</div>
     <button id="leaveShop">CONTINUE</button></div>`;
   picks.forEach((c,i)=>{
     ov.querySelector(`[data-i="${i}"]`).onclick=()=>{
-      if(run.money>=c.cost){ run.money-=c.cost; c.apply(); c.bought=true; ov.querySelector(`[data-i="${i}"]`).style.opacity=.3; }
+      const price=Math.max(1,Math.round(c.cost*(run.shopDiscount?0.9:1))); if(run.money>=price){ run.money-=price; c.apply(); run.shopBuys=(run.shopBuys||0)+1; c.bought=true; checkAchievements(); ov.querySelector(`[data-i="${i}"]`).style.opacity=.3; }
     };
   });
   document.getElementById('leaveShop').onclick=()=>{ ov.classList.add('hidden'); nextRound(); };
 }
 
 function runOver(){
-  if(!run || run.over) return;
+  if(run.over) return;
   run.over=true;
+  checkAchievements();
   const points = run.rules.length*3 + run.round;
   meta.rp += points;
   meta.stats.runs++;
@@ -742,29 +800,51 @@ function runOver(){
     <button onclick="openMeta()">UPGRADES</button></div>`;
 }
 
-// ---------- meta shop ----------
-function metaCost(lvl){ return 10 + lvl*8; }
+// ---------- permanent meta upgrades ----------
+const META_UPGRADES=[
+ {id:'fortune',icon:'💰',name:'Fortune',desc:'+5% money from every successful door.',cost:20,tier:1},
+ {id:'iron_will',icon:'🛡️',name:'Iron Will',desc:'Reduce the base door end chance by 1.5 percentage points.',cost:25,tier:1},
+ {id:'second_hand',icon:'⏪',name:'Second Hand',desc:'Start every run with 1 rewind use.',cost:30,tier:2},
+ {id:'guardian_sigil',icon:'🔰',name:'Guardian Sigil',desc:'Start every run with one shield.',cost:35,tier:2},
+ {id:'sixth_sense',icon:'👁️',name:'Sixth Sense',desc:'Show a risk hint on every door.',cost:40,tier:2},
+ {id:'merchant',icon:'🛒',name:'Merchant Seal',desc:'Shop prices are permanently 10% cheaper.',cost:50,tier:3},
+ {id:'deep_pockets',icon:'🪙',name:'Deep Pockets',desc:'Start each run with $20.',cost:55,tier:3},
+ {id:'slow_rules',icon:'📚',name:'Patient Mind',desc:'New rules arrive every 6 rooms instead of 5.',cost:60,tier:3},
+ {id:'master_keysmith',icon:'🗝️',name:'Keysmith',desc:'Start each run with one Master Key.',cost:75,tier:4},
+ {id:'scholar',icon:'📖',name:'Rule Scholar',desc:'Start each run with one additional positive rule.',cost:85,tier:4},
+ {id:'door_mastery',icon:'✨',name:'Door Mastery',desc:'Your most-used door type becomes 5% safer during the run.',cost:95,tier:4}
+];
+const META_TIERS={1:{label:'FOUNDATION',unlock:0},2:{label:'EXPLORER',unlock:30},3:{label:'VETERAN',unlock:90},4:{label:'MASTER',unlock:180}};
+function tierUnlocked(t){ if(t===1)return true; return !!meta['tier'+t]; }
+function tierUnlockCost(t){ return META_TIERS[t].unlock; }
+function buyTier(t){ const key='tier'+t; const cost=tierUnlockCost(t); if(meta[key]||meta.rp<cost)return; meta.rp-=cost; meta[key]=true; saveMeta(); renderMeta(); }
+
 function renderMeta(){
   document.getElementById('rp').textContent=meta.rp;
-  const el=document.getElementById('metalist');
-  el.innerHTML='';
-  el.appendChild(metaRow(`+2% Money per door (Lvl ${meta.moneyLvl}/${MONEY_MAX})`, meta.moneyLvl<MONEY_MAX?metaCost(meta.moneyLvl):null, ()=>{meta.moneyLvl++;}));
-  el.appendChild(metaRow(`-0.5% base door end chance (Lvl ${meta.safeLvl}/${SAFE_MAX}) — now ${(baseEndChance()*100).toFixed(1)}%`, meta.safeLvl<SAFE_MAX?metaCost(meta.safeLvl):null, ()=>{meta.safeLvl++;}));
-
+  const el=document.getElementById('metalist'); el.innerHTML='';
+  [1,2,3,4].forEach(t=>{
+    const tier=META_TIERS[t];
+    const head=document.createElement('div'); head.className='tier-head';
+    const unlocked=tierUnlocked(t);
+    head.innerHTML=`<div><b>TIER ${t} — ${tier.label}</b><br><span class="small">${t===1?'Starting upgrades':('Unlocks 3 new permanent upgrades')}</span></div>`;
+    if(t>1 && !unlocked){
+      const b=document.createElement('button'); b.textContent=`UNLOCK ${tier.unlock} RP`; b.disabled=meta.rp<tier.unlock; b.onclick=()=>buyTier(t); head.appendChild(b);
+    } else { const tag=document.createElement('span'); tag.className='small'; tag.textContent='UNLOCKED'; head.appendChild(tag); }
+    el.appendChild(head);
+    META_UPGRADES.filter(u=>u.tier===t).forEach(u=>{
+      const owned=hasMetaUpgrade(u.id);
+      el.appendChild(metaRow(`${u.icon} ${u.name} — ${u.desc}`, owned?null:u.cost, ()=>{meta.upgrades[u.id]=true;} , owned, unlocked));
+    });
+  });
+  el.insertAdjacentHTML('beforeend', renderAchievements());
 }
-function metaRow(label, cost, onBuy){
-  const div=document.createElement('div');
-  div.className='meta-row';
-  div.innerHTML=`<div>${label}</div>`;
-  const btn=document.createElement('button');
-  if(cost===null){ btn.textContent='MAX'; btn.disabled=true; }
-  else{
-    btn.textContent=`${cost} RP`;
-    btn.disabled = meta.rp<cost;
-    btn.onclick=()=>{ if(meta.rp>=cost){ meta.rp-=cost; onBuy(); saveMeta(); renderMeta(); } };
-  }
-  div.appendChild(btn);
-  return div;
+function metaRow(label, cost, onBuy, owned=false, unlocked=true){
+  const div=document.createElement('div'); div.className='meta-row';
+  div.innerHTML=`<div>${label}</div>`; const btn=document.createElement('button');
+  if(owned){ btn.textContent='OWNED'; btn.disabled=true; }
+  else if(!unlocked){ btn.textContent='LOCKED'; btn.disabled=true; }
+  else { btn.textContent=`${cost} RP`; btn.disabled=meta.rp<cost; btn.onclick=()=>{ if(meta.rp>=cost){ meta.rp-=cost; onBuy(); saveMeta(); renderMeta(); } }; }
+  div.appendChild(btn); return div;
 }
 </script>
 </body>
