@@ -196,16 +196,20 @@ button:disabled{opacity:.35;cursor:default;transform:none;box-shadow:5px 5px 0 v
 #screen-game.corruption-off .corruption-mark{display:none!important}
 #screen-game.corruption-off #doors{animation:none!important}
 #screen-game.corruption-off .door-frame.corrupted-door{box-shadow:none!important;animation:none!important}
-.secret-hole{position:absolute;left:24%;right:22%;top:18%;bottom:2%;z-index:2;background:#000;pointer-events:none}.secret-door .door-frame-art{z-index:2}.secret-door .door-leaf{z-index:3}
+.secret-hole{display:none}.secret-door .door-frame-art{z-index:2;background-size:100% 100%;background-position:center center}.secret-door .door-leaf{z-index:3;background-size:100% 100%;background-position:center center}
 </style>
 </head>
 <body>
 <div id="app">
+<audio id="musicNormal" preload="auto" loop src="Onwards.mp3"></audio>
+<audio id="musicBoss" preload="auto" loop src="Saga Will Never Die.mp3"></audio>
+
+
 
 <div class="chain left"></div>
 <div class="chain right"></div>
 
-<div id="screen-title">
+<div id="screen-title" onclick="playMusic('normal')">
   <div class="candle"></div>
   <div class="title-kicker">THE DOORS ARE WAITING</div>
   <h1>DoomDoors</h1>
@@ -576,41 +580,36 @@ function renderAchievements(){
 
 // ---------- run state ----------
 let run=null;
-let ambientAudio=null;
-let ambientTimer=null;
-function startAmbientAudio(){
-  if(ambientAudio)return;
-  try{
-    const C=window.AudioContext||window.webkitAudioContext;if(!C)return;
-    const ctx=new C();
-    const master=ctx.createGain();master.gain.value=.12;master.connect(ctx.destination);
-    const filter=ctx.createBiquadFilter();filter.type='lowpass';filter.frequency.value=1750;filter.Q.value=.9;filter.connect(master);
-    const bass=ctx.createOscillator();bass.type='triangle';bass.frequency.value=55;
-    const bg=ctx.createGain();bg.gain.value=.24;bass.connect(bg).connect(filter);bass.start();
-    const pad=ctx.createOscillator();pad.type='sawtooth';pad.frequency.value=110;
-    const pg=ctx.createGain();pg.gain.value=.028;pad.connect(pg).connect(filter);pad.start();
-    const mapNotes={endless_hall:[55,65.41,73.42,82.41,73.42,65.41],tower:[55,69.3,82.41,103.83,82.41,69.3],labyrinth:[49,58.27,73.42,87.31,73.42,58.27],mirror:[61.74,73.42,92.5,110,92.5,73.42],garden:[55,69.3,82.41,98,110,82.41]};
-    const notes=mapNotes[run?.map]||mapNotes.endless_hall;
-    let n=0,step=0;
-    const tick=()=>{
-      if(ctx.state==='suspended')ctx.resume();
-      const now=ctx.currentTime;const root=notes[n++%notes.length];
-      const o=ctx.createOscillator(),g=ctx.createGain();o.type=(step%5===0?'square':'triangle');o.frequency.value=root*2;
-      g.gain.setValueAtTime(.0001,now);g.gain.exponentialRampToValueAtTime(.055,now+.025);g.gain.exponentialRampToValueAtTime(.0001,now+.46);o.connect(g).connect(filter);o.start(now);o.stop(now+.5);
-      const a=ctx.createOscillator(),ag=ctx.createGain();a.type='square';a.frequency.value=root*4;ag.gain.setValueAtTime(.0001,now+.08);ag.gain.exponentialRampToValueAtTime(.026,now+.11);ag.gain.exponentialRampToValueAtTime(.0001,now+.27);a.connect(ag).connect(filter);a.start(now+.08);a.stop(now+.29);
-      if(step%2===0){const k=ctx.createOscillator(),kg=ctx.createGain();k.type='square';k.frequency.value=70;kg.gain.setValueAtTime(.045,now);kg.gain.exponentialRampToValueAtTime(.0001,now+.09);k.connect(kg).connect(master);k.start(now);k.stop(now+.1);}
-      if(step%8===7){const c=ctx.createOscillator(),cg=ctx.createGain();c.type='triangle';c.frequency.value=root/2;cg.gain.setValueAtTime(.0001,now);cg.gain.exponentialRampToValueAtTime(.07,now+.03);cg.gain.exponentialRampToValueAtTime(.0001,now+.8);c.connect(cg).connect(filter);c.start(now);c.stop(now+.82);}
-      step++;
-    };
-    tick();ambientTimer=setInterval(tick,480);
-    ambientAudio={ctx,master,filter,bass,pad,bossTimer:null};
-  }catch(e){console.warn('audio',e);}
+let musicNormal=null;
+let musicBoss=null;
+let musicMode='normal';
+let musicUnlocked=false;
+function ensureMusic(){
+  if(musicNormal&&musicBoss)return;
+  musicNormal=document.getElementById('musicNormal');
+  musicBoss=document.getElementById('musicBoss');
+  if(musicNormal){musicNormal.loop=true;musicNormal.volume=.72;}
+  if(musicBoss){musicBoss.loop=true;musicBoss.volume=.82;}
 }
-function startBossAudio(){
-  try{if(!ambientAudio)return;const ctx=ambientAudio.ctx;ambientAudio.master.gain.cancelScheduledValues(ctx.currentTime);ambientAudio.master.gain.linearRampToValueAtTime(.17,ctx.currentTime+.18);ambientAudio.filter.frequency.setTargetAtTime(2200,ctx.currentTime,.08);clearInterval(ambientAudio.bossTimer);ambientAudio.bossTimer=setInterval(()=>{const now=ctx.currentTime;[73.42,58.27,46.25,82.41][Math.floor(Math.random()*4)];const o=ctx.createOscillator(),g=ctx.createGain();o.type='square';o.frequency.value=[73.42,58.27,46.25,82.41][Math.floor(Math.random()*4)];g.gain.setValueAtTime(.12,now);g.gain.exponentialRampToValueAtTime(.0001,now+.2);o.connect(g).connect(ambientAudio.master);o.start(now);o.stop(now+.22);},220);}catch(e){}}
-function stopBossAudio(){try{if(!ambientAudio)return;clearInterval(ambientAudio.bossTimer);ambientAudio.bossTimer=null;ambientAudio.master.gain.cancelScheduledValues(ambientAudio.ctx.currentTime);ambientAudio.master.gain.linearRampToValueAtTime(.12,ambientAudio.ctx.currentTime+.35);ambientAudio.filter.frequency.setTargetAtTime(1750,ambientAudio.ctx.currentTime,.12);}catch(e){}}
+function playMusic(mode='normal'){
+  ensureMusic();
+  const target=mode==='boss'?musicBoss:musicNormal;
+  const other=mode==='boss'?musicNormal:musicBoss;
+  if(!target)return;
+  musicMode=mode;
+  if(other){other.pause();try{other.currentTime=0;}catch(e){}}
+  const p=target.play();
+  if(p&&typeof p.catch==='function')p.catch(()=>{});
+}
+function startAmbientAudio(){ playMusic('normal'); }
+function startBossAudio(){ playMusic('boss'); }
+function stopBossAudio(){ playMusic('normal'); }
+function stopAmbientAudio(){
+  ensureMusic();
+  [musicNormal,musicBoss].forEach(a=>{if(a){a.pause();try{a.currentTime=0;}catch(e){}}});
+  musicMode='normal';
+}
 
-function stopAmbientAudio(){ if(!ambientAudio)return; try{clearInterval(ambientTimer);clearInterval(ambientAudio.bossTimer);ambientAudio.ctx.close();}catch(e){} ambientAudio=null; ambientTimer=null; }
 function createGameParticles(){
   const el=document.getElementById('gameParticles'); if(!el)return; el.innerHTML='';
   for(let i=0;i<28;i++){ const p=document.createElement('i'); p.className='game-particle'; p.style.left=(Math.random()*100)+'%'; p.style.setProperty('--dx',((Math.random()*180)-90)+'px'); p.style.animationDuration=(5+Math.random()*8)+'s'; p.style.animationDelay=(-Math.random()*10)+'s'; el.appendChild(p); }
@@ -648,12 +647,13 @@ function startRun(mapId){
   updateGardenSeed();
   window.nextRound();
 }
-function backTitle(){ stopAmbientAudio(); show('screen-title'); }
+function backTitle(){ show('screen-title'); playMusic('normal'); }
 function openMeta(){ renderMeta(); show('screen-meta'); }
 
 function show(id){
   ['screen-title','screen-mapselect','screen-game','screen-meta'].forEach(s=>document.getElementById(s).classList.toggle('hidden', s!==id));
   document.getElementById('overlay').classList.add('hidden');
+  if(id!=='screen-game' || musicMode!=='boss') playMusic('normal');
 }
 
 function renderRules(animate){
@@ -1028,7 +1028,7 @@ function openMiniBoss(after){
   run.boss={name:b.name,hp:b.hp,maxHp:b.hp,turn:0,pattern:b.pattern,reward:b.reward};
   startBossAudio();
   const ov=document.getElementById('overlay');ov.classList.remove('hidden');
-  const finish=()=>{stopBossAudio();run.boss=null;checkAchievements();after&&after();};
+  const finish=()=>{stopBossAudio();run.boss=null;ov.classList.add('hidden');checkAchievements();setTimeout(()=>{if(run&&!run.over){after&&after();}},60);};
   const render=msg=>{
     if(!run||!run.boss)return;
     const hp='■'.repeat(Math.max(0,run.boss.hp))+'□'.repeat(Math.max(0,run.boss.maxHp-run.boss.hp));
@@ -1500,7 +1500,7 @@ function metaRow(label, cost, onBuy, owned=false, unlocked=true){
   function renderSecretDoor(secret,frame){
     frame.className='door-frame d-blue secret-door';
     frame.dataset.secret=secret.id;
-    frame.innerHTML=`<div class="door-inside"><div class="amt"></div><div class="msg"></div></div><div class="door-frame-art" style="background-image:url('${secret.frame}')"></div><div class="secret-hole"></div><div class="door-leaf door-panel" style="background-image:url('${secret.leaf}')"><div class="door-overlay"><div class="label">${secret.name}</div></div></div>`;
+    frame.innerHTML=`<div class="door-inside"><div class="amt"></div><div class="msg"></div></div><div class="door-frame-art" style="background-image:url('${secret.frame}')"></div><div class="door-leaf door-panel" style="background-image:url('${secret.leaf}')"><div class="door-overlay"><div class="label">${secret.name}</div></div></div>`;
     frame.onclick=()=>openSpecialDoor(secret,frame);
   }
   function openSpecialDoor(secret,frame){
