@@ -103,16 +103,10 @@ button:disabled{opacity:.35;cursor:default;transform:none;box-shadow:5px 5px 0 v
 .c5{background:#f2e1ff;border-color:#8a2fdc}
 .c6{background:#fff0f7;border-color:#d631c9}
 .c7{background:#fff9e1;border-color:#e8c96a}
-.c8{background:#2a0e3d;border-color:#c04dff;color:#fff}
+.c8{background:#2a0e3d;border-color:#c04dff;color:#fff}.c1,.c2,.c3,.c4,.c5,.c6,.c7,.c9{color:#111}.c8{color:#fff3d6}
 .c9{background:#e1fbff;border-color:#3fb2c9}
 .meta-row{display:flex;justify-content:space-between;align-items:center;border:2px solid var(--dim);padding:10px;margin:8px 0;font-size:9px;text-align:left}
 .meta-row div{flex:1}
-
-.corruption-toggle-row{width:min(760px,94%);margin:0 auto 12px;display:flex;align-items:center;justify-content:space-between;gap:12px;border:2px solid #3b3344;background:rgba(0,0,0,.55);padding:8px 10px;box-sizing:border-box;font-size:8px;text-align:left}
-.corruption-toggle-label{display:flex;flex-direction:column;gap:3px}.corruption-toggle-label b{font-size:9px;color:#ff78a8}.corruption-toggle-label span{font-size:6px;color:#8e7da0;line-height:1.4}
-.corruption-switch{position:relative;display:inline-flex;align-items:center;gap:7px;cursor:pointer;user-select:none;flex-shrink:0}
-.corruption-switch input{position:absolute;opacity:0;pointer-events:none}.corruption-slider{width:46px;height:24px;background:#302936;border:2px solid #685b70;display:inline-block;position:relative;box-sizing:border-box;transition:.2s}.corruption-slider:before{content:'';position:absolute;width:16px;height:16px;left:2px;top:2px;background:#777080;transition:.2s;box-shadow:2px 2px 0 rgba(0,0,0,.35)}
-.corruption-switch input:checked + .corruption-slider{background:#45142a;border-color:#d92c6b;box-shadow:0 0 10px rgba(217,44,107,.22)}.corruption-switch input:checked + .corruption-slider:before{transform:translateX(20px);background:#ff5f98}.corruption-switch-text{min-width:24px;font-size:7px;color:#a99eaf}
 .map-card{display:flex;flex-direction:column;align-items:flex-start;border:3px solid var(--ink);background:var(--panel);padding:12px;margin:8px 0;text-align:left;cursor:pointer;box-shadow:4px 4px 0 rgba(0,0,0,.25)}
 .map-card b{font-size:10px;margin-bottom:6px}
 .map-card span{font-size:8px;color:var(--dim);line-height:1.6}
@@ -196,14 +190,10 @@ button:disabled{opacity:.35;cursor:default;transform:none;box-shadow:5px 5px 0 v
 
 <div id="screen-mapselect" class="hidden">
   <h1 style="font-size:20px">CHOOSE A PLACE</h1>
-  <div class="corruption-toggle-row">
-    <div class="corruption-toggle-label"><b>☠ CORRUPTION MODE</b><span>Extra corruption mechanics, corrupted doors and surges.</span></div>
-    <label class="corruption-switch" aria-label="Corruption an oder aus">
-      <input id="corruptionToggle" type="checkbox" checked onchange="setCorruptionEnabled(this.checked)">
-      <span class="corruption-slider"></span><span class="corruption-switch-text" id="corruptionToggleText">ON</span>
-    </label>
-  </div>
   <div id="mapList"></div>
+  <div id="corruptionToggle" class="small" style="margin:10px auto 12px;max-width:420px;border:2px solid var(--dim);padding:8px;background:var(--panel);text-align:left">
+    <label style="display:flex;align-items:center;justify-content:space-between;gap:10px;cursor:pointer"><span><b>CORRUPTION</b><br><span class="small">Enable the corruption system for this run.</span></span><input id="corruptionSwitch" type="checkbox" style="width:18px;height:18px;accent-color:var(--glow)"></label>
+  </div>
   <button onclick="backTitle()">BACK</button>
 </div>
 
@@ -245,6 +235,10 @@ function saveMeta(){ try{ localStorage.setItem('hexdoor_meta', JSON.stringify(me
 
 // Permanent upgrade system — 11 one-time upgrades in four tiers.
 if(!meta.upgrades) meta.upgrades={};
+if(!meta.secrets) meta.secrets={chess:false,dark_matter:false,heaven:false};
+if(!meta.lore) meta.lore=[];
+if(typeof meta.corruptionEnabled!=='boolean') meta.corruptionEnabled=true;
+
 if(meta.moneyLvl>0) meta.upgrades.fortune=true; // migrate older saves
 if(meta.safeLvl>0) meta.upgrades.iron_will=true; // migrate older saves
 function hasMetaUpgrade(id){ return !!meta.upgrades[id]; }
@@ -262,7 +256,6 @@ const CORRUPTION_STAGES=[
   {max:100,label:'CRITICAL',desc:'Reality is barely holding.',risk:0.10}
 ];
 function corruptionStage(){
-  if(!run || !run.corruptionEnabled) return 0;
   const c=Math.max(0,Math.min(100,run?.corruption||0));
   for(let i=0;i<CORRUPTION_STAGES.length;i++) if(c<=CORRUPTION_STAGES[i].max) return i;
   return 4;
@@ -271,8 +264,6 @@ function corruptionRisk(){ return CORRUPTION_STAGES[corruptionStage()].risk; }
 function corruptionName(){ return CORRUPTION_STAGES[corruptionStage()].label; }
 function updateCorruptionUI(){
   if(!run) return;
-  const hud=document.getElementById('corruptionHud');
-  if(hud) hud.style.display=run.corruptionEnabled?'':'none';
   const screen=document.getElementById('screen-game');
   if(screen){ for(let i=0;i<5;i++) screen.classList.remove('corruption-'+i); screen.classList.add('corruption-'+corruptionStage()); }
   const value=document.getElementById('corruptionValue');
@@ -283,7 +274,7 @@ function updateCorruptionUI(){
   if(stage) stage.textContent=corruptionName()+' — '+CORRUPTION_STAGES[corruptionStage()].desc;
 }
 function addCorruption(amount,reason,opts={}){
-  if(!run || !run.corruptionEnabled || run.over || !amount) return;
+  if(!run || run.over || !amount) return;
   const before=run.corruption||0;
   run.corruption=Math.max(0,Math.min(100,before+amount));
   updateCorruptionUI();
@@ -298,9 +289,8 @@ function addCorruption(amount,reason,opts={}){
     if(!run.inShop) setTimeout(triggerCorruptionSurge,160);
   }
 }
-function corruptionDoorModifier(){ return run && run.corruptionEnabled ? corruptionRisk() : 0; }
+function corruptionDoorModifier(){ return corruptionRisk(); }
 function corruptionRoomGain(){
-  if(!run || !run.corruptionEnabled) return 0;
   let gain=1.2;
   if(run.map==='endless_hall') gain*=1.2;
   if(run.map==='tower' && (run.floor||1)>=3) gain*=1.1;
@@ -309,7 +299,6 @@ function corruptionRoomGain(){
   return gain;
 }
 function markCorruptedDoors(){
-  if(!run || !run.corruptionEnabled) return;
   const doors=document.querySelectorAll('#doors .door-frame');
   if(!doors.length || corruptionStage()<2) return;
   const count=corruptionStage()>=4?2:1;
@@ -323,7 +312,7 @@ function markCorruptedDoors(){
   }
 }
 function triggerCorruptionSurge(){
-  if(!run || !run.corruptionEnabled || run.over) return;
+  if(!run || run.over) return;
   run.corruptionSurgePending=false;
   const ov=document.getElementById('overlay');
   if(!ov) return;
@@ -589,20 +578,7 @@ function createGameParticles(){
   for(let i=0;i<28;i++){ const p=document.createElement('i'); p.className='game-particle'; p.style.left=(Math.random()*100)+'%'; p.style.setProperty('--dx',((Math.random()*180)-90)+'px'); p.style.animationDuration=(5+Math.random()*8)+'s'; p.style.animationDelay=(-Math.random()*10)+'s'; el.appendChild(p); }
 }
 
-let corruptionEnabled=true;
-try{ const saved=localStorage.getItem('doomdoors_corruption_enabled'); if(saved!==null) corruptionEnabled=saved==='1'; }catch(e){}
-function setCorruptionEnabled(enabled){
-  corruptionEnabled=!!enabled;
-  try{localStorage.setItem('doomdoors_corruption_enabled',corruptionEnabled?'1':'0');}catch(e){}
-  const t=document.getElementById('corruptionToggleText'); if(t) t.textContent=corruptionEnabled?'ON':'OFF';
-}
-function syncCorruptionToggle(){
-  const c=document.getElementById('corruptionToggle'); if(c) c.checked=corruptionEnabled;
-  const t=document.getElementById('corruptionToggleText'); if(t) t.textContent=corruptionEnabled?'ON':'OFF';
-}
-
 function showMapSelect(){
-  syncCorruptionToggle();
   const el=document.getElementById('mapList');
   el.innerHTML='';
   MAPS.forEach(m=>{
@@ -619,7 +595,7 @@ function startRun(mapId){
   document.getElementById('screen-game').dataset.map=mapId;
   document.getElementById('levelName').textContent=(MAPS.find(m=>m.id===mapId)||{}).name||'';
   createGameParticles();
-  run={round:0, corruptionEnabled:corruptionEnabled, money:meta.upgrades.deep_pockets?20:0, rules:[], doorsOpened:0, over:false, moneyMult:1, shield:meta.upgrades.guardian_sigil?1:0,
+  run={round:0, money:meta.upgrades.deep_pockets?20:0, rules:[], doorsOpened:0, over:false, moneyMult:1, shield:meta.upgrades.guardian_sigil?1:0,
        ruleInterval:meta.upgrades.slow_rules?6:5, shopInterval:10, lastType:null, streak:0, doorHistory:[],
        upgrades:[], discoveredSecrets:[], strikes:0, debt:0, decisionsRemaining:null, clockExpired:false, echoSource:null,
        map:mapId, floor:1, nextBossAt:15, mirrorBias:{}, seed:{growth:0,required:3}, pathMult:1,
@@ -1076,7 +1052,7 @@ function openShop(){
     stock.forEach(c=>{c.__corrupted=false;});
     picks=[...stock].sort(()=>Math.random()-0.5).slice(0,5);
     const grid=ov.querySelector('.shopcards'); if(!grid)return;
-    const corruptCount=(run.corruptionEnabled && corruptionStage()>=3?1:0);
+    const corruptCount=(corruptionStage()>=3?1:0);
     const corruptIndex=corruptCount?Math.floor(Math.random()*picks.length):-1;
     grid.innerHTML=picks.map((c,i)=>{ const price=cardPrice(c); const poor=run.money<price; const corrupt=i===corruptIndex; return `<div class="shopcard ${c.cls}${poor?' unaffordable':''}${corrupt?' corruption-card':''}" data-i="${i}"><b>${corrupt?'☠ ':''}${c.name}</b><span>${corrupt?c.desc+'<br><b style="color:#b01854">CORRUPTED: +5% door risk this run</b>':c.desc}</span><span class="card-cost">$${price}</span></div>`; }).join('');
     picks.forEach((c,i)=>{ if(i===corruptIndex) c.__corrupted=true; });
@@ -1132,7 +1108,7 @@ function openShop(){
 function showInfo(){
   const ov=document.getElementById('overlay');
   ov.classList.remove('hidden');
-  ov.innerHTML=`<div class="card-box"><h2>DOOMDOORS — RULES</h2><p>Choose one of six doors each room. Survive, earn coins, learn rules and buy cards.</p><p><b>CORRUPTION</b> can be enabled or disabled before choosing a level. When enabled, corruption rises as you play, makes doors more dangerous and can corrupt shop cards. At 100% a Corruption Surge appears.</p><p>The Garden can reduce corruption when its seed blooms. Some maps and cards interact with the corruption.</p><button id="closeInfo">CLOSE</button></div>`;
+  ov.innerHTML=`<div class="card-box"><h2>DOOMDOORS — RULES</h2><p>Choose one of six doors each room. Survive, earn coins, learn rules and buy cards.</p><p><b>CORRUPTION</b> rises as you play. Higher corruption makes doors more dangerous and can corrupt shop cards. At 100% a Corruption Surge gives you a choice to purify, embrace, or endure it.</p><p>The Garden can reduce corruption when its seed blooms. Some maps and cards interact with the corruption.</p><button id="closeInfo">CLOSE</button></div>`;
   document.getElementById('closeInfo').onclick=()=>ov.classList.add('hidden');
 }
 
@@ -1217,6 +1193,315 @@ function metaRow(label, cost, onBuy, owned=false, unlocked=true){
   else { btn.textContent=`${cost} RP`; btn.disabled=meta.rp<cost; btn.onclick=()=>{ if(meta.rp>=cost){ meta.rp-=cost; onBuy(); saveMeta(); renderMeta(); } }; }
   div.appendChild(btn); return div;
 }
+
+
+
+// ============================================================
+// DOOMDOORS EXPANSION PACK — functionality only
+// Keeps the existing UI, art and layout intact.
+// ============================================================
+(function(){
+  const OLD={};
+  OLD.renderDoors=window.renderDoors;
+  OLD.endChanceFor=window.endChanceFor;
+  OLD.proceedRoom=window.proceedRoom;
+  OLD.nextRound=window.nextRound;
+  OLD.renderRunCards=window.renderRunCards;
+
+  // ----- persistent switches / migration -----
+  meta.secrets=meta.secrets||{chess:false,dark_matter:false,heaven:false};
+  meta.lore=Array.isArray(meta.lore)?meta.lore:[];
+  if(typeof meta.corruptionEnabled!=='boolean') meta.corruptionEnabled=true;
+
+  // The requested corruption ON/OFF switch is stored between runs.
+  const originalShowMapSelect=window.showMapSelect;
+  window.showMapSelect=function(){
+    originalShowMapSelect();
+    const sw=document.getElementById('corruptionSwitch');
+    if(sw){ sw.checked=meta.corruptionEnabled; sw.onchange=()=>{meta.corruptionEnabled=!!sw.checked;saveMeta();}; }
+  };
+
+  // When corruption is disabled it truly has no gameplay effect.
+  const oldAddCorruption=window.addCorruption;
+  window.addCorruption=function(amount,reason,opts={}){
+    if(!meta.corruptionEnabled) return;
+    return oldAddCorruption(amount,reason,opts);
+  };
+  const oldCorruptionRisk=window.corruptionRisk;
+  window.corruptionRisk=function(){ return meta.corruptionEnabled?oldCorruptionRisk():0; };
+  const oldMarkCorruptedDoors=window.markCorruptedDoors;
+  window.markCorruptedDoors=function(){ if(!meta.corruptionEnabled) return; return oldMarkCorruptedDoors(); };
+  const oldTriggerCorruptionSurge=window.triggerCorruptionSurge;
+  window.triggerCorruptionSurge=function(){ if(!meta.corruptionEnabled)return; return oldTriggerCorruptionSurge(); };
+  const oldUpdateCorruptionUI=window.updateCorruptionUI;
+  window.updateCorruptionUI=function(){
+    const r=oldUpdateCorruptionUI();
+    if(typeof ambientAudio!=='undefined' && ambientAudio?.master){
+      const stage=meta.corruptionEnabled?(run?corruptionStage():0):0;
+      const mapGain=run?.map==='garden'?0.85:run?.map==='mirror'?1.08:run?.map==='tower'?1.02:1;
+      ambientAudio.master.gain.value=0.028*mapGain + stage*0.004;
+    }
+    return r;
+  };
+
+  // ----- rule combinations -----
+  function hasRuleLocal(id){ return !!(run && run.rules && run.rules.some(r=>r.id===id)); }
+  function ruleSynergyRisk(){
+    if(!run) return 0;
+    let r=0;
+    if(hasRuleLocal('memory')&&hasRuleLocal('echo')) r+=0.035;
+    if(hasRuleLocal('no_safe_door')&&hasRuleLocal('three_strikes')) r+=0.025;
+    if(hasRuleLocal('debt')&&hasRuleLocal('clock')) r+=0.02;
+    if(hasRuleLocal('streak')&&hasRuleLocal('memory')) r-=0.015;
+    return r;
+  }
+  window.endChanceFor=function(type){
+    return Math.min(.95,Math.max(.01,OLD.endChanceFor(type)+ruleSynergyRisk()+(run?.cardSynergyRisk||0)));
+  };
+
+  // ----- card archetypes + synergies -----
+  function owned(name){ return !!(run&&run.ownedCards&&run.ownedCards.some(c=>c.name===name)); }
+  function syncCardSynergies(){
+    if(!run)return;
+    run.cardSynergyRisk=0;
+    run.cardSynergySafe=0;
+    run.cardSynergyGold=0;
+    if(owned('Lucky Coin')&&owned('Blood Pact')) run.cardSynergyGold+=3;
+    if(owned('Guardian Halo')&&owned('Ward Rune')) run.cardSynergySafe+=0.03;
+    if(owned('Cartographer')&&owned('Pocket Watch')) run.cardSynergyGold+=5;
+    if(owned('Blindfold')&&owned('Sixth Sense')) run.cardSynergySafe+=0.04;
+    if(owned('Rule Breaker')&&owned('Joker\'s Grin')) run.cardSynergySafe+=0.02;
+    if(owned('Devil\'s Bargain')&&owned('Thorn Crown')) run.cardSynergyRisk+=0.02;
+    if(owned('Master Key')&&owned('Twin Keys')) run.cardSynergySafe+=0.02;
+    if(owned('Steel Hinges')&&owned('Night Lantern')) run.cardSynergySafe+=0.02;
+  }
+  const oldFinishGain=window.finishGain;
+  window.finishGain=function(gain,d,amtEl,msgEl){
+    syncCardSynergies();
+    if(run.cardSynergyGold) gain+=run.cardSynergyGold;
+    return oldFinishGain(gain,d,amtEl,msgEl);
+  };
+  window.renderRunCards=function(){ syncCardSynergies(); return OLD.renderRunCards(); };
+
+  // Additional cards, using the existing card UI/classes only.
+  const extraCards=[
+    {cls:'c2',name:'Archivist',desc:'Every 4th rule carried gives +$8.',cost:34,apply:()=>run.archivist=true},
+    {cls:'c6',name:'Resonance Shard',desc:'When two rules form a synergy, gain $15 once per room.',cost:37,apply:()=>run.resonanceShard=true},
+    {cls:'c4',name:'Garden Trowel',desc:'Garden seed growth gains +1 room progress every 3rd room.',cost:35,apply:()=>run.gardenTrowel=true},
+    {cls:'c7',name:'Secret Compass',desc:'Secret doors appear twice as often.',cost:52,apply:()=>run.secretCompass=true},
+    {cls:'c1',name:'Clean Slate',desc:'At 5+ rules, reduce corruption gain from rules by 50%.',cost:46,apply:()=>run.cleanSlate=true},
+    {cls:'c9',name:'Event Lantern',desc:'Events offer an extra reward choice once per run.',cost:39,apply:()=>run.eventLantern=true}
+  ];
+  if(typeof CARD_DEFS!=='undefined'){ extraCards.forEach(c=>{if(!CARD_DEFS.some(x=>x.name===c.name))CARD_DEFS.push(c);}); }
+
+  // ----- three permanent secret doors -----
+  const secretSvg=(kind,leaf=false)=>{
+    let body='';
+    if(kind==='chess') body=leaf?`<rect x="38" y="40" width="124" height="180" rx="4" fill="#211d1a" stroke="#d8a13b" stroke-width="6"/><path d="M48 62h104M48 104h104M48 146h104M48 188h104M80 40v180M122 40v180" stroke="#6f6252" stroke-width="3"/><text x="100" y="132" text-anchor="middle" font-size="46" fill="#eee">♞</text>`:`<path d="M18 218V44l22-20h120l22 20v174z" fill="#b9bdc5" stroke="#343842" stroke-width="7"/><path d="M42 218V54l18-14h100l18 14v164z" fill="#eee"/><text x="100" y="34" text-anchor="middle" font-size="28">♟</text>`;
+    if(kind==='dark') body=leaf?`<rect x="36" y="38" width="128" height="184" rx="6" fill="#10081d" stroke="#8e4cff" stroke-width="6"/><circle cx="100" cy="130" r="48" fill="#05010b" stroke="#c45cff" stroke-width="5"/><circle cx="78" cy="110" r="10" fill="#fff"/><circle cx="126" cy="148" r="7" fill="#b76cff"/><path d="M45 78Q100 10 155 78M45 184Q100 248 155 184" fill="none" stroke="#6e2aff" stroke-width="5"/>`:`<path d="M18 218V48l22-24h120l22 24v170z" fill="#343044" stroke="#9c55ff" stroke-width="7"/><circle cx="100" cy="32" r="18" fill="#05010b" stroke="#b75cff" stroke-width="5"/>`;
+    if(kind==='heaven') body=leaf?`<rect x="38" y="38" width="124" height="184" fill="#75cfff" stroke="#f4c85d" stroke-width="7"/><path d="M38 82h124M38 170h124" stroke="#fff" stroke-width="10" opacity=".8"/><circle cx="100" cy="54" r="20" fill="#fff8b8"/><path d="M68 100q32-38 64 0M62 145q38-46 76 0" fill="none" stroke="#fff" stroke-width="12" opacity=".8"/>`:`<path d="M18 218V48l24-28h116l24 28v170z" fill="#f3f0e8" stroke="#d6a33b" stroke-width="7"/><path d="M44 52l56-28 56 28" fill="#fff" stroke="#e7c45b" stroke-width="5"/><circle cx="100" cy="24" r="15" fill="#fff3a0" stroke="#d8a13b" stroke-width="4"/>`;
+    return 'data:image/svg+xml;charset=UTF-8,'+encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="200" height="240" viewBox="0 0 200 240">${body}</svg>`);
+  };
+  const SPECIAL_DOORS={
+    chess:{id:'secret_chess',name:'CHESS DOOR',unlock:'chess',frame:secretSvg('chess'),leaf:secretSvg('chess',true),lore:'The first door was never meant to be opened by chance.',open(){
+      const ov=document.getElementById('overlay');ov.classList.remove('hidden');
+      ov.innerHTML=`<div class="card-box"><h2>♟ CHESS DOOR</h2><p>One move is correct. Which piece moves in an L?</p><button id="chKnight">KNIGHT</button><button id="chBishop">BISHOP</button><button id="chRook">ROOK</button></div>`;
+      const done=(ok)=>{if(ok){secretFound('chess',this.lore);finishSpecialDoor(60,'♞','CHESS WON');}else{addCorruption(10,'chess mistake');finishSpecialDoor(0,'✕','WRONG MOVE');}};
+      document.getElementById('chKnight').onclick=()=>done(true);document.getElementById('chBishop').onclick=()=>done(false);document.getElementById('chRook').onclick=()=>done(false);
+    }},
+    dark:{id:'secret_dark',name:'DARK MATTER',unlock:'dark_matter',frame:secretSvg('dark'),leaf:secretSvg('dark',true),lore:'Something behind the doors is heavier than darkness.',open(){
+      const ov=document.getElementById('overlay');ov.classList.remove('hidden');
+      ov.innerHTML=`<div class="card-box"><h2>◉ DARK MATTER</h2><p>The mass wants a price. Take the matter, or leave it untouched.</p><button id="dmTake">TAKE THE MATTER — +$120</button><button id="dmLeave">LEAVE IT</button></div>`;
+      document.getElementById('dmTake').onclick=()=>{run.corruption=Math.min(100,(run.corruption||0)+18);updateCorruptionUI();secretFound('dark_matter',this.lore);finishSpecialDoor(120,'◉','MATTER CLAIMED');};
+      document.getElementById('dmLeave').onclick=()=>finishSpecialDoor(10,'','LEFT UNTOUCHED');
+    }},
+    heaven:{id:'secret_heaven',name:'HEAVEN DOOR',unlock:'heaven',frame:secretSvg('heaven'),leaf:secretSvg('heaven',true),lore:'Above the last garden there is a sky that remembers every name.',open(){
+      const ov=document.getElementById('overlay');ov.classList.remove('hidden');
+      ov.innerHTML=`<div class="card-box"><h2>✦ HEAVEN DOOR</h2><p>A quiet door. No trick. One blessing, once per room.</p><button id="heavenOpen">OPEN THE HEAVEN DOOR</button></div>`;
+      document.getElementById('heavenOpen').onclick=()=>{secretFound('heaven',this.lore);run.corruption=Math.max(0,(run.corruption||0)-20);updateCorruptionUI();finishSpecialDoor(90,'✦','BLESSING');};
+    }}
+  };
+  function secretFound(id,lore){
+    if(!meta.secrets[id]){meta.secrets[id]=true;if(lore&&!meta.lore.includes(lore))meta.lore.push(lore);saveMeta();}
+  }
+  function checkSecretUnlocks(){
+    if(!run)return;
+    if(!meta.secrets.chess && run.doorsOpened>=12 && !run.usedShield && !run.usedRewind && !run.secondChanceUsed) { meta.secrets.chess=true;meta.lore.push(SPECIAL_DOORS.chess.lore); }
+    if(!meta.secrets.dark_matter && run.darkMatterWitness) { meta.secrets.dark_matter=true;meta.lore.push(SPECIAL_DOORS.dark.lore); }
+    if(!meta.secrets.heaven && (run.blooms||0)>=2) { meta.secrets.heaven=true;meta.lore.push(SPECIAL_DOORS.heaven.lore); }
+    saveMeta();
+  }
+  function unlockedSecrets(){return Object.values(meta.secrets).filter(Boolean).length;}
+  function chooseSecretDoor(){
+    const list=[];if(meta.secrets.chess)list.push(SPECIAL_DOORS.chess);if(meta.secrets.dark_matter)list.push(SPECIAL_DOORS.dark);if(meta.secrets.heaven)list.push(SPECIAL_DOORS.heaven);
+    if(!list.length)return null;
+    const chance=run.secretCompass?0.12:0.055;
+    return Math.random()<chance?list[Math.floor(Math.random()*list.length)]:null;
+  }
+  function renderSecretDoor(secret,frame){
+    frame.className='door-frame d-blue secret-door';
+    frame.dataset.secret=secret.id;
+    frame.innerHTML=`<div class="door-inside"><div class="amt"></div><div class="msg"></div></div><div class="door-frame-art" style="background-image:url('${secret.frame}')"></div><div class="door-leaf door-panel" style="background-image:url('${secret.leaf}')"><div class="door-overlay"><div class="label">${secret.name}</div></div></div>`;
+    frame.onclick=()=>openSpecialDoor(secret,frame);
+  }
+  function openSpecialDoor(secret,frame){
+    if(!run||run.over||busy)return;busy=true;
+    const leaf=frame.querySelector('.door-leaf');if(leaf)leaf.classList.add('open');
+    secret.open();
+  }
+  function finishSpecialDoor(gain,icon,msg){
+    run.doorsOpened++;run.specialDoors=(run.specialDoors||0)+1;
+    run.money+=gain;document.getElementById('money').textContent=run.money;
+    addCorruption(0.5,'secret door',{popup:false});
+    busy=false;checkSecretUnlocks();
+    popup(msg,(gain?'You gained $'+gain+'. ':'')+(icon||''),()=>{if(run&& !run.over)proceedRoom();});
+  }
+  window.renderDoors=function(){
+    OLD.renderDoors();
+    if(!run||run.over)return;
+    checkSecretUnlocks();
+    if(unlockedSecrets()===0)return;
+    const frames=[...document.querySelectorAll('#doors .door-frame')].filter(f=>!f.dataset.secret);
+    const secret=chooseSecretDoor();
+    if(secret&&frames.length){renderSecretDoor(secret,frames[Math.floor(Math.random()*frames.length)]);}
+  };
+
+  // Level-specific boss personalities. The existing boss UI is reused; only the rules/rewards change.
+  const oldOpenMiniBoss=window.openMiniBoss;
+  window.openMiniBoss=function(after){
+    if(!run) return oldOpenMiniBoss(after);
+    const special={
+      endless_hall:{name:'THE HALL WARDEN',desc:'The Warden offers a dangerous shortcut.',safe:()=>{run.hallCalm=2;return 'The next two doors are calmer.';},challenge:()=>Math.random()<0.52,reward:75},
+      tower:{name:'THE ASCENDING KING',desc:'The King tests whether you deserve the next floor.',safe:()=>{if(run.money<20)return null;run.money-=20;return 'You pay the tower toll.';},challenge:()=>Math.random()<0.58,reward:80},
+      labyrinth:{name:'THE MAZE MINOTAUR',desc:'The Minotaur knows which path you took.',safe:()=>{run.pathMult=1;return 'You escape the maze with $18.';},challenge:()=>Math.random()<0.5,reward:95},
+      mirror:{name:'THE MIRROR SOVEREIGN',desc:'Your previous fate is reflected back at you.',safe:()=>{run.cardSafe=(run.cardSafe||0)+0.05;return 'Your reflection grants protection.';},challenge:()=>Math.random()<0.55,reward:100},
+      garden:{name:'THE THORN CROWN',desc:'The garden demands proof that you can protect what grows.',safe:()=>{if(run.seed)run.seed.growth=Math.min(run.seed.required,run.seed.growth+1);return 'The seed grows.';},challenge:()=>Math.random()<0.62,reward:85}
+    }[run.map];
+    if(!special) return oldOpenMiniBoss(after);
+    const ov=document.getElementById('overlay');ov.classList.remove('hidden');
+    ov.innerHTML=`<div class="card-box boss-card"><h2>👹 ${special.name}</h2><p>${special.desc}</p><button class="boss-choice" id="bossSafe">SAFE CHOICE</button><button class="boss-choice" id="bossFight">CHALLENGE THE BOSS</button></div>`;
+    const finish=()=>{run.bossesDefeated++;checkAchievements();after&&after();};
+    document.getElementById('bossSafe').onclick=()=>{const msg=special.safe();if(msg===null){popup('NO WAY OUT','You cannot afford the safe option. Challenge the boss instead.',()=>{});return;}document.getElementById('money').textContent=run.money;popup('BOSS PASSED',msg,finish);};
+    document.getElementById('bossFight').onclick=()=>{const win=special.challenge();if(win){run.money+=special.reward;document.getElementById('money').textContent=run.money;popup('BOSS DEFEATED','You earned $'+special.reward+'.',finish);}else if(run.shield>0){run.shield--;run.usedShield=true;popup('SAVED','Your shield absorbs the boss attack.',finish);}else{popup('BOSS WINS','The boss defeats you. The run is over.',()=>runOver());}};
+  };
+
+  // ----- story / events -----
+  const EVENTS=[
+    {id:'sealed_note',title:'A SEALED NOTE',text:'A note is pinned to the wall. It knows your next door.',choices:[{label:'READ IT',fn:()=>{run.money+=12;addLore('The note says: The doors remember the hands that opened them.');return '+$12 and a story fragment.';}},{label:'BURN IT',fn:()=>{addCorruption(-6,'burned note');return 'The ash feels strangely clean.';}}]},
+    {id:'merchant',title:'THE WANDERING MERCHANT',text:'A merchant offers a temporary bargain.',choices:[{label:'BUY THE CHARM — $15',fn:()=>{if(run.money<15)return 'Not enough money.';run.money-=15;run.cardSafe=(run.cardSafe||0)+0.08;return 'All doors are 8% safer this room.';}},{label:'REFUSE',fn:()=>{run.money+=8;return 'He leaves you $8.';}}]},
+    {id:'mirror_pool',title:'THE MIRROR POOL',text:'Your reflection is holding a coin you do not have.',choices:[{label:'TAKE IT',fn:()=>{if(Math.random()<0.6){run.money+=35;return '+$35.';}addCorruption(8,'mirror pool');return 'The reflection laughs. Corruption rises.';}},{label:'WALK AWAY',fn:()=>{run.cardSafe=(run.cardSafe||0)+0.04;return 'You feel watched, but safer.';}}]},
+    {id:'old_rule',title:'A RULE THAT NEVER FINISHED',text:'A half-written rule lies on the floor.',choices:[{label:'COMPLETE IT',fn:()=>{run.forcePositive=true;return 'Your next new rule will be positive.';}},{label:'TEAR IT',fn:()=>{if(run.rules.length>1)run.rules.splice(run.rules.length-1,1);return 'The newest rule disappears.';}}]},
+    {id:'garden_seed',title:'A SECOND SEED',text:'Something small grows beside the path.',choices:[{label:'PLANT IT',fn:()=>{if(run.map==='garden'){run.seed.growth=Math.min(run.seed.required,run.seed.growth+1);return 'The Garden seed grows faster.';}addLore('There was once another garden beyond the fifth door.');return 'You keep the memory.';}},{label:'LEAVE IT',fn:()=>{addCorruption(-3,'quiet place');return 'The room becomes quieter.';}}]},
+    {id:'door_whisper',title:'THE WHISPER',text:'A voice offers one piece of information.',choices:[{label:'LISTEN',fn:()=>{run.nextHintBonus=true;return 'Your next Sixth Sense hint is accurate.';}},{label:'IGNORE',fn:()=>{run.money+=5;return '+$5 for refusing the whisper.';}}]}
+  ];
+  function addLore(text){if(text&&!meta.lore.includes(text)){meta.lore.push(text);saveMeta();}}
+  function maybeEvent(){
+    if(!run||run.over||run.inShop||run.eventOpen||run.doorsOpened<4)return false;
+    if(run.doorsOpened%4!==0)return false;
+    if(run.lastEventDoor===run.doorsOpened)return false;
+    if(Math.random()>(run.eventLantern?0.5:0.28))return false;
+    run.lastEventDoor=run.doorsOpened;run.eventOpen=true;
+    const e=EVENTS[Math.floor(Math.random()*EVENTS.length)];
+    const ov=document.getElementById('overlay');ov.classList.remove('hidden');
+    ov.innerHTML=`<div class="card-box"><h2>EVENT — ${e.title}</h2><p>${e.text}</p><div id="eventChoices"></div></div>`;
+    const box=document.getElementById('eventChoices');
+    e.choices.forEach((c,i)=>{const b=document.createElement('button');b.textContent=c.label;b.onclick=()=>{const result=c.fn();document.getElementById('money').textContent=run.money;run.eventOpen=false;ov.classList.add('hidden');popup('EVENT',result,()=>{if(run&&!run.over)OLD.proceedRoom();});};box.appendChild(b);});
+    return true;
+  }
+  window.proceedRoom=function(){
+    if(run&&!run.eventOpen&&maybeEvent())return;
+    return OLD.proceedRoom();
+  };
+
+  // ----- level-specific additions -----
+  const oldMapDefs=MAP_DEFS;
+  // Endless Hall: milestone choices make long survival meaningfully different.
+  const oldNextRound=window.nextRound;
+  window.nextRound=function(){
+    if(!run||run.over)return;
+    if(run.map==='endless_hall'&&run.doorsOpened>0&&run.doorsOpened%10===0&&run.hallMilestoneDoor!==run.doorsOpened){
+      run.hallMilestoneDoor=run.doorsOpened;
+      const ov=document.getElementById('overlay');ov.classList.remove('hidden');
+      ov.innerHTML=`<div class="card-box"><h2>THE HALL REMEMBERS</h2><p>The corridor offers two futures.</p><button id="hallRisk">GO DEEPER — +$35, +6% corruption</button><button id="hallCalm">WALK QUIETLY — -4% door risk for 3 doors</button></div>`;
+      document.getElementById('hallRisk').onclick=()=>{run.money+=35;addCorruption(6,'hall milestone');ov.classList.add('hidden');oldNextRound();};
+      document.getElementById('hallCalm').onclick=()=>{run.hallCalm=3;ov.classList.add('hidden');oldNextRound();};
+      return;
+    }
+    return oldNextRound();
+  };
+  const oldEndChance=window.endChanceFor;
+  window.endChanceFor=function(type){
+    let c=oldEndChance(type);
+    if(run?.hallCalm>0){c-=0.04;run.hallCalm--;};
+    if(run?.resonanceShard && ruleSynergyRisk()>0 && run.lastSynergyDoor!==run.doorsOpened){run.lastSynergyDoor=run.doorsOpened;run.money+=15;document.getElementById('money').textContent=run.money;}
+    return Math.min(.95,Math.max(.01,c));
+  };
+
+  // Tower gets named floor objectives without changing the existing floor UI.
+  const oldTowerStart=MAP_DEFS.tower.onRoomStart;
+  MAP_DEFS.tower.onRoomStart=function(r){
+    oldTowerStart&&oldTowerStart(r);
+    const f=r.floor||1;
+    if(f>=2 && r.floorObjective!==f){r.floorObjective=f;r.floorObjectiveDone=false;}
+    if(r.floorObjective===f&&!r.floorObjectiveDone&&r.doorsOpened>0&&r.doorsOpened%5===0){r.floorObjectiveDone=true;r.money+=10+f*3;}
+  };
+  // Garden: track blooms for Heaven Door unlock.
+  const oldGardenEnd=MAP_DEFS.garden.onRoomEnd;
+  MAP_DEFS.garden.onRoomEnd=function(r){
+    const before=r.seed?.growth||0;const req=r.seed?.required||3;
+    oldGardenEnd&&oldGardenEnd(r);
+    if(before+1>=req){r.blooms=(r.blooms||0)+1;checkSecretUnlocks();}
+  };
+
+  // Track Dark Matter unlock after surviving at high corruption.
+  const oldOpenDoor=window.openDoor;
+  window.openDoor=function(d,frame){
+    const before=run?.corruption||0;
+    const result=oldOpenDoor(d,frame);
+    if(run&&!run.over&&meta.corruptionEnabled&&before>=80)run.darkMatterWitness=true;
+    return result;
+  };
+
+  const oldShowInfo=window.showInfo;
+  window.showInfo=function(){
+    oldShowInfo();
+    const ov=document.getElementById('overlay');
+    const box=ov?.querySelector('.card-box');
+    if(box && (meta.lore||[]).length){
+      const p=document.createElement('p');p.innerHTML='<b>LORE FRAGMENTS</b><br>'+meta.lore.map(x=>'• '+x).join('<br>');box.insertBefore(p,box.querySelector('button'));
+    }
+  };
+
+  // ----- lore + secret progress in achievements panel -----
+  const oldRenderAchievements=window.renderAchievements;
+  window.renderAchievements=function(){
+    const base=oldRenderAchievements();
+    const secretCount=Object.values(meta.secrets||{}).filter(Boolean).length;
+    const lore=meta.lore||[];
+    return base+`<div class="achievement-box"><b>SECRETS — ${secretCount}/3</b><div class="achievement ${meta.secrets.chess?'':'locked'}"><div class="ach-icon">♟</div><div><b>${meta.secrets.chess?'CHESS DOOR':'???'}</b><br><span class="small">${meta.secrets.chess?'A door of strategy.':'A secret door waits somewhere.'}</span></div></div><div class="achievement ${meta.secrets.dark_matter?'':'locked'}"><div class="ach-icon">◉</div><div><b>${meta.secrets.dark_matter?'DARK MATTER DOOR':'???'}</b><br><span class="small">${meta.secrets.dark_matter?'A door that bends the run.':'The darkness has not noticed you yet.'}</span></div></div><div class="achievement ${meta.secrets.heaven?'':'locked'}"><div class="ach-icon">✦</div><div><b>${meta.secrets.heaven?'HEAVEN DOOR':'???'}</b><br><span class="small">${meta.secrets.heaven?'A quiet door above the garden.':'Something bright remains unopened.'}</span></div></div>${lore.length?`<div class="small" style="margin-top:8px">LORE FRAGMENTS: ${lore.length}</div>`:''}</div>`;
+  };
+
+  // ----- bug guards -----
+  const oldEndRunVoluntarily=window.endRunVoluntarily;
+  window.endRunVoluntarily=function(){busy=false;return oldEndRunVoluntarily();};
+  const oldBackTitle=window.backTitle;
+  window.backTitle=function(){busy=false;return oldBackTitle();};
+  // Avoid stale overlays after a run has ended.
+  const originalRunOver=window.runOver;
+  window.runOver=function(){busy=false;return originalRunOver();};
+
+  // Re-sync the UI whenever a run starts.
+  const oldStartRun=window.startRun;
+  window.startRun=function(mapId){
+    const result=oldStartRun(mapId);
+    if(run){run.blooms=0;run.specialDoors=0;run.eventOpen=false;run.hallMilestoneDoor=-1;run.hallCalm=0;run.darkMatterWitness=false;run.secretCompass=false;run.resonanceShard=false;syncCardSynergies();}
+    const sw=document.getElementById('corruptionSwitch');if(sw)sw.checked=meta.corruptionEnabled;
+    return result;
+  };
+
+  // Save once after loading the migrated state.
+  saveMeta();
+})();
 
 </script>
 </body>
