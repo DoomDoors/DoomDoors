@@ -187,7 +187,7 @@ button:disabled{opacity:.35;cursor:default;transform:none;box-shadow:5px 5px 0 v
 
 /* corruption system */
 #corruptionHud{width:min(230px,72%);margin:4px auto 9px;border:2px solid #5c5068;background:rgba(8,6,12,.86);padding:4px 6px;box-sizing:border-box;transition:border-color .3s,box-shadow .3s,filter .3s;}
-.corruption-head{display:flex;align-items:center;justify-content:space-between;font-size:6px;color:#d8cce8;letter-spacing:.35px;line-height:1.1}.corruption-head b{color:#ff6d9e;font-size:6px}.corruption-track{height:7px;margin-top:4px;background:#211a29;border:2px solid #4b3c55;overflow:hidden}.corruption-track #corruptionFill{height:100%;width:0;background:linear-gradient(90deg,#6e5cff,#b42cff,#ff3b6b);transition:width .45s ease;box-shadow:0 0 8px rgba(255,55,120,.55)}
+.corruption-head{display:block;text-align:center;font-size:7px;color:#ff6d9e;letter-spacing:1px;line-height:1.1;text-shadow:0 0 5px rgba(255,55,120,.35)}.corruption-track{height:10px;margin-top:4px;background:#211a29;border:2px solid #4b3c55;overflow:hidden}.corruption-track #corruptionFill{height:100%;width:0;background:linear-gradient(90deg,#6e5cff,#b42cff,#ff3b6b);transition:width .45s ease;box-shadow:0 0 8px rgba(255,55,120,.55)}
 #corruptionStage{font-size:5px;color:#8e7da0;margin-top:3px;text-align:left;line-height:1.1}
 #screen-game.corruption-1 #corruptionHud{border-color:#715b8d}
 #screen-game.corruption-2 #corruptionHud{border-color:#a45a9e;box-shadow:0 0 10px rgba(180,50,170,.22)}
@@ -213,8 +213,8 @@ button:disabled{opacity:.35;cursor:default;transform:none;box-shadow:5px 5px 0 v
 
 /* title screen — original DoomDoors layout */
 #screen-title,#screen-mapselect,#screen-meta{position:relative;}
-#screen-mapselect .info-btn,#screen-meta .info-btn,#screen-game .info-btn{position:absolute;top:0;right:0;width:32px;height:32px;padding:0;border:3px solid var(--ink);background:#fff;color:#111;font-size:14px;z-index:50;box-shadow:3px 3px 0 rgba(0,0,0,.2);cursor:pointer;}
-#screen-mapselect .info-btn:hover,#screen-meta .info-btn:hover,#screen-game .info-btn:hover{transform:translate(-1px,-1px);}
+.info-btn{position:fixed!important;top:10px!important;right:10px!important;width:32px;height:32px;padding:0;border:3px solid var(--ink);background:#fff;color:#111;font-size:14px;z-index:50;box-shadow:3px 3px 0 rgba(0,0,0,.2);cursor:pointer;}
+.info-btn:hover{transform:translate(-1px,-1px);}
 .settings-box{max-width:520px;width:100%;}
 .settings-row{border:2px solid var(--dim);padding:12px;margin:8px 0;text-align:left;font-size:9px;}
 .settings-row input[type=range]{width:100%;margin-top:9px;}
@@ -237,6 +237,7 @@ button:disabled{opacity:.35;cursor:default;transform:none;box-shadow:5px 5px 0 v
 <div class="chain right"></div>
 
 <div id="screen-title">
+  <button class="info-btn" onclick="showInfo()" aria-label="Spielregeln">i</button>
   <div class="candle"></div>
   <h1>DoomDoors</h1>
   <div class="rainbow-bar"></div>
@@ -261,7 +262,7 @@ button:disabled{opacity:.35;cursor:default;transform:none;box-shadow:5px 5px 0 v
   <div id="gameParticles"></div><div id="levelAtmosphere"></div><div id="levelName"></div><div id="runSideCards"><div class="run-card-column" id="runCards"></div><div class="run-card-column" id="runCardsRight"></div></div>
   <div id="hud"><span>ROOM <b id="round">0</b></span><span>$<b id="money">0</b></span></div>
   <div id="corruptionHud" aria-label="Corruption">
-    <div class="corruption-head"><span>☠ CORRUPTION</span><b id="corruptionValue">0%</b></div>
+    <div class="corruption-head"><span>☠ CORRUPTION</span></div>
     <div class="corruption-track"><div id="corruptionFill"></div></div>
     <div id="corruptionStage">STABLE</div>
   </div>
@@ -327,10 +328,8 @@ function updateCorruptionUI(){
   if(!run) return;
   const screen=document.getElementById('screen-game');
   if(screen){ for(let i=0;i<5;i++) screen.classList.remove('corruption-'+i); screen.classList.add('corruption-'+corruptionStage()); }
-  const value=document.getElementById('corruptionValue');
   const fill=document.getElementById('corruptionFill');
   const stage=document.getElementById('corruptionStage');
-  if(value) value.textContent=Math.round(run.corruption||0)+'%';
   if(fill) fill.style.width=Math.max(0,Math.min(100,run.corruption||0))+'%';
   if(stage) stage.textContent=corruptionName()+' — '+CORRUPTION_STAGES[corruptionStage()].desc;
 }
