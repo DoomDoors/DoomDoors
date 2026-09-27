@@ -131,8 +131,8 @@ button:disabled{opacity:.35;cursor:default;transform:none;box-shadow:5px 5px 0 v
 .game-particle{position:absolute;bottom:-12px;width:3px;height:3px;background:#8b7dff;box-shadow:5px -4px 0 rgba(124,107,255,.35);animation:floatPixel linear infinite;opacity:.6}
 @keyframes floatPixel{from{transform:translate(0,0);opacity:0}15%{opacity:.65}to{transform:translate(var(--dx),-110vh);opacity:0}}
 #levelName{font-size:9px;color:var(--glow);letter-spacing:1px;margin-bottom:8px}
-#runSideCards{position:fixed;left:8px;right:8px;top:104px;bottom:12px;display:grid;grid-template-columns:minmax(92px,150px) minmax(92px,150px);justify-content:space-between;align-items:stretch;gap:12px;pointer-events:none;z-index:20;padding:0;box-sizing:border-box}
-.run-card-column{min-width:0;display:flex;flex-direction:column;gap:8px;overflow-y:auto;overflow-x:hidden;padding:3px 4px 10px;scrollbar-width:thin;scrollbar-color:#756889 transparent;pointer-events:auto;box-sizing:border-box}
+#runSideCards{position:fixed;left:0;right:0;top:104px;bottom:12px;display:grid;grid-template-columns:minmax(92px,150px) minmax(92px,150px);justify-content:space-between;align-items:stretch;gap:0;pointer-events:none;z-index:20;padding:0;box-sizing:border-box}
+.run-card-column{min-width:0;display:flex;flex-direction:column;gap:8px;overflow-y:auto;overflow-x:hidden;padding:3px 0 10px;scrollbar-width:thin;scrollbar-color:#756889 transparent;pointer-events:auto;box-sizing:border-box}
 .run-card{flex:0 0 auto;background:#f6f0d7;color:#2e291e;border:3px solid #6e5a35;padding:7px;font-size:7px;line-height:1.45;text-align:left;box-shadow:3px 3px 0 rgba(0,0,0,.35);pointer-events:auto}
 .run-card b{display:block;font-size:8px;margin-bottom:4px}.run-card span{display:block}.run-card .mini{font-size:6px;color:#806b43;margin-top:5px}
 #gardenSeed{margin:8px auto 12px;width:min(420px,90%);min-height:68px;border:3px solid #5d6841;background:rgba(20,35,20,.78);position:relative;box-shadow:4px 4px 0 rgba(0,0,0,.3);color:#e8f1c9}
@@ -151,7 +151,7 @@ button:disabled{opacity:.35;cursor:default;transform:none;box-shadow:5px 5px 0 v
 #screen-game[data-map="labyrinth"]{background:linear-gradient(135deg,rgba(40,120,95,.08),transparent 50%)}
 #screen-game[data-map="mirror"]{background:linear-gradient(90deg,rgba(80,150,255,.06),transparent 48%,rgba(150,100,255,.08))}
 #screen-game[data-map="garden"]{background:radial-gradient(circle at 50% 75%,rgba(100,190,80,.14),transparent 45%)}
-@media(max-width:900px){#runSideCards{left:4px;right:4px;top:92px;bottom:8px;grid-template-columns:minmax(74px,24vw) minmax(74px,24vw);gap:5px}.run-card-column{gap:6px;padding:2px 2px 8px}.run-card{font-size:6px;padding:6px}.run-card b{font-size:7px}.run-card .mini{font-size:5px}}
+@media(max-width:900px){#runSideCards{left:0;right:0;top:92px;bottom:8px;grid-template-columns:minmax(74px,24vw) minmax(74px,24vw);gap:0}.run-card-column{gap:6px;padding:2px 2px 8px}.run-card{font-size:6px;padding:6px}.run-card b{font-size:7px}.run-card .mini{font-size:5px}}
 
 
 /* animated level atmosphere */
@@ -1596,8 +1596,108 @@ function openShop(){
 function showInfo(){
   const ov=document.getElementById('overlay');
   ov.classList.remove('hidden');
-  ov.innerHTML=`<div class="card-box"><h2>DOOMDOORS — RULES</h2><p>Choose one of six doors each room. Survive, earn coins, learn rules and buy cards.</p>${meta.corruptionEnabled?'<p><b>CORRUPTION</b> rises as you play. Higher corruption makes doors more dangerous and can corrupt shop cards. At 100% a Corruption Surge gives you a choice to purify, embrace, or endure it.</p><p>The Garden can reduce corruption when its seed blooms. Some maps and cards interact with the corruption.</p>':''}<div style="margin-top:34px;padding-top:18px;border-top:2px solid var(--dim);text-align:center;font-size:7px;color:var(--dim);line-height:1.7">From Josua without AI<br>Menrath is calling</div><button id="closeInfo">CLOSE</button></div>`;
-  document.getElementById('closeInfo').onclick=()=>ov.classList.add('hidden');
+  ov.classList.add('info-overlay');
+  ov.innerHTML=`
+    <div class="info-panel">
+      <div class="info-panel-head">
+        <div>
+          <div class="info-kicker">DOOMDOORS</div>
+          <h2>SPIELREGELN &amp; SYSTEME</h2>
+        </div>
+        <button id="closeInfo" class="info-close" aria-label="Schließen">×</button>
+      </div>
+
+      <section class="info-section">
+        <h3>01 — REGELKONZEPT</h3>
+        <p>In jedem Raum stehen <b>6 Türen</b>. Du wählst genau eine Tür. Eine erfolgreiche Tür bringt Geld und du gehst weiter. Eine fehlgeschlagene Tür kann den Run beenden — Schutz, Karten und Regeln können das Risiko verändern.</p>
+        <ul>
+          <li>Die grundlegende Tür-Endchance liegt bei <b>6%</b>.</li>
+          <li>Mit jedem Run sammelst du <b>Regeln</b>. Positive Regeln helfen, negative Regeln erhöhen den Druck.</li>
+          <li>Normalerweise erscheint alle <b>5 geöffneten Türen</b> eine neue Regel.</li>
+          <li>Alle <b>10 Türen</b> öffnet der Shop.</li>
+          <li>Alle <b>7 Türen</b> kann ein Raum-Event ausgelöst werden.</li>
+          <li>Der erste Mini-Boss erscheint nach <b>15 Türen</b>, danach alle weiteren 15 Türen.</li>
+        </ul>
+        <p>Dein Ziel ist nicht nur zu überleben, sondern Regeln, Geld, Karten und dauerhafte Verbesserungen sinnvoll miteinander zu kombinieren.</p>
+      </section>
+
+      <section class="info-section">
+        <h3>02 — RÄUME &amp; TÜREN</h3>
+        <p>Es gibt derzeit <b>9 Türtypen</b>: Blue, Red, Rainbow, Eyed, LED, Devil, Angel, Joker und Flame. Welche Türen verfügbar sind, hängt von deinem Fortschritt und Freischaltungen ab.</p>
+        <p>Tür-Risiken können durch Regeln, Level, Karten, Tür-Evolution, Corruption und permanente Upgrades verändert werden. Manche Systeme machen einzelne Türtypen sicherer, andere erhöhen bewusst das Risiko.</p>
+        <p><b>Master Door:</b> Wenn du die drei Key Fragments A+B+C gesammelt hast, kann eine zusätzliche MASTER-Tür erscheinen. Eine Master Key kann außerdem einen fehlgeschlagenen Türentscheid ignorieren.</p>
+      </section>
+
+      <section class="info-section">
+        <h3>03 — LEVEL / MAPS</h3>
+        <div class="info-grid">
+          <div><b>The Endless Hall</b><span>Survival: Es gibt kein echtes Ende. Je länger du überlebst, desto stärker steigt das zusätzliche Risiko.</span></div>
+          <div><b>The Tower</b><span>Climb: Alle 5 Türen erreichst du einen neuen Floor. Später können zusätzliche Gesetze/Regeln hinzukommen.</span></div>
+          <div><b>The Labyrinth</b><span>Choice: Alle 3 Räume entsteht eine Wegentscheidung zwischen regelorientiertem und goldorientiertem Pfad.</span></div>
+          <div><b>The Mirror</b><span>Echo: Das Schicksal eines Türtyps kann in den nächsten Raum zurückwirken.</span></div>
+          <div><b>The Garden</b><span>Reward: Du lässt einen Samen wachsen. Beim Blühen gibt es eine größere Auszahlung.</span></div>
+        </div>
+      </section>
+
+      <section class="info-section">
+        <h3>04 — KARTEN</h3>
+        <p>Im Shop kaufst du <b>Run-Karten</b>. Sie gelten für den aktuellen Run und verändern Risiko, Geld, Schutz oder spezielle Systeme. Der Shop erscheint standardmäßig alle 10 Türen; Rerolls ersetzen die übrigen Karten und werden teurer.</p>
+        <p>Beispiele: <b>Steel Hinges</b> macht alle Türen sicherer, <b>Lucky Coin</b> erhöht Tür-Geld, <b>Guardian Halo</b> schützt vor dem nächsten Tod, <b>Master Key</b> ignoriert einen Fehlschlag und <b>Cartographer</b> gibt eine Vorschau auf den nächsten Raum.</p>
+        <p>Einige Karten haben bewusst einen Preis oder ein Risiko als Gegenleistung für einen starken Bonus. Gekaufte Karten erscheinen während des Runs an den Seiten des Spielfelds.</p>
+      </section>
+
+      <section class="info-section">
+        <h3>05 — EVENTS</h3>
+        <p>Alle 7 geöffneten Türen kann ein <b>Room Event</b> auftauchen. Events geben dir mehrere Entscheidungen. Beispiele sind der <b>Sealed Note</b>, der <b>Wandering Merchant</b>, der <b>Mirror Pool</b>, eine unvollständige Regel, ein zusätzlicher Garden-Samen oder das <b>Whisper</b>.</p>
+        <p>Je nach Entscheidung kannst du Geld, Corruption, Regeln, Schutz oder andere Run-Effekte erhalten oder verlieren.</p>
+      </section>
+
+      <section class="info-section boss-info">
+        <h3>06 — BOSS-KAMPF</h3>
+        <p>Mini-Bosse erscheinen ab <b>15 geöffneten Türen</b> und danach alle 15 Türen. Jeder Level hat seinen eigenen Boss.</p>
+        <ul>
+          <li><b>The Endless Hall:</b> The Hall Warden — 12 HP — $75 Belohnung.</li>
+          <li><b>The Tower:</b> The Ascending King — 13 HP — $80 Belohnung.</li>
+          <li><b>The Labyrinth:</b> The Maze Minotaur — 14 HP — $95 Belohnung.</li>
+          <li><b>The Mirror:</b> The Mirror Sovereign — 15 HP — $100 Belohnung.</li>
+          <li><b>The Garden:</b> The Thorn Crown — 13 HP — $85 Belohnung.</li>
+        </ul>
+        <p>Im Boss-Raum werden <b>3 Türen</b> gezeigt. Links steht, welche Tür gesucht wird. Rechts läuft der Timer. Du musst die richtige Tür möglichst schnell wählen.</p>
+        <ul>
+          <li>Richtige Tür: <b>1–5 Schaden</b> abhängig von der Geschwindigkeit.</li>
+          <li>Falsche Tür: <b>-$20 bis -$30</b>.</li>
+          <li>Langsamer als 6 Sekunden: zusätzlich <b>-$10 + weitere Sekundenstrafe</b>.</li>
+          <li>Bei 0 HP ist der Boss besiegt und du erhältst seine Geldbelohnung.</li>
+        </ul>
+      </section>
+
+      <section class="info-section corruption-info">
+        <h3>07 — CORRUPTION SYSTEM</h3>
+        <p>Corruption ist ein <b>Run-weites Drucksystem</b>. Der Wert reicht von <b>0% bis 100%</b>. Mit steigender Corruption werden Türen gefährlicher und ab höheren Stufen können Türen und Shop-Karten korrumpiert werden.</p>
+        <div class="info-stages">
+          <div><b>0–19%</b><span>STABLE — keine zusätzliche Türgefahr.</span></div>
+          <div><b>20–39%</b><span>TAINTED — +2% Tür-Risiko.</span></div>
+          <div><b>40–59%</b><span>DISTORTED — +4% Tür-Risiko; korrumpierte Türen können erscheinen.</span></div>
+          <div><b>60–79%</b><span>UNSTABLE — +7% Tür-Risiko.</span></div>
+          <div><b>80–100%</b><span>CRITICAL — +10% Tür-Risiko; bis zu zwei Türen können korrumpiert werden.</span></div>
+        </div>
+        <p>Corruption steigt unter anderem durch negative Regeln und bestimmte Karten, Events oder Level-Effekte. Der Garden kann die Corruption abschwächen.</p>
+        <p>Bei <b>100%</b> startet eine <b>Corruption Surge</b>. Du kannst <b>Purify für $25</b> wählen und auf 32% zurückgehen, <b>Embrace</b> wählen und $35 erhalten, aber bei 72% bleiben, oder <b>Endure</b> wählen und auf 65% zurückgehen.</p>
+      </section>
+
+      <section class="info-section upgrade-info">
+        <h3>08 — PERMANENTE UPGRADES &amp; REGELPUNKTE</h3>
+        <p><b>Regelpunkte (RP)</b> bleiben zwischen Runs erhalten. Ein normal beendeter Run gibt <b>3 RP pro getragener Regel + 1 RP pro überlebter Runde</b>. Freiwilliges Beenden gibt 0 RP.</p>
+        <p>Die permanenten Upgrades sind in vier Tiers organisiert. Ein Tier muss zuerst mit RP freigeschaltet werden.</p>
+        <div class="info-tier"><b>TIER 1 — FOUNDATION</b><span>Direkt verfügbar.</span><p>💰 Fortune — 20 RP — +5% Geld pro erfolgreicher Tür.<br>🛡️ Iron Will — 25 RP — senkt die Basis-Endchance um 1,5 Prozentpunkte.</p></div>
+        <div class="info-tier"><b>TIER 2 — EXPLORER</b><span>30 RP zum Freischalten.</span><p>⏪ Second Hand — 30 RP — 1 Rewind pro Run.<br>🔰 Guardian Sigil — 35 RP — startet mit 1 Shield.<br>⚡ Momentum Core — 40 RP — nach 4 Erfolgen: nächster Erfolg +$20 und -5% Corruption.</p></div>
+        <div class="info-tier"><b>TIER 3 — VETERAN</b><span>90 RP zum Freischalten.</span><p>🛒 Merchant Seal — 50 RP — Shop dauerhaft 10% günstiger.<br>🪙 Deep Pockets — 55 RP — startet mit $20.<br>📚 Patient Mind — 60 RP — neue Regeln alle 6 statt 5 Räume.</p></div>
+        <div class="info-tier"><b>TIER 4 — MASTER</b><span>180 RP zum Freischalten.</span><p>🗝️ Keysmith — 75 RP — startet mit einer Master Key.<br>📖 Rule Scholar — 85 RP — startet mit einer zusätzlichen positiven Regel.<br>✨ Door Mastery — 95 RP — meistbenutzter Türtyp wird im Run 5% sicherer.</p></div>
+      </section>
+
+      <div class="info-footer">From Josua without AI<br>Menrath is calling</div>
+    </div>`;
+  document.getElementById('closeInfo').onclick=()=>{ov.classList.remove('info-overlay');ov.classList.add('hidden');};
 }
 
 function requestEndRun(){
@@ -2014,6 +2114,18 @@ function metaRow(label, cost, onBuy, owned=false, unlocked=true){
 })();
 
 </script>
+
+<style id="info-panel-scroll-final">
+#overlay.info-overlay{position:fixed!important;inset:0!important;z-index:950!important;background:rgba(4,3,8,.28)!important;display:block!important;padding:10px!important;box-sizing:border-box!important;overflow:hidden!important}
+#overlay.info-overlay .info-panel{position:absolute;top:10px;right:10px;bottom:10px;width:min(430px,calc(100vw - 20px));box-sizing:border-box;background:#111018;color:var(--ink);border:3px solid var(--ink);box-shadow:7px 7px 0 rgba(0,0,0,.55);padding:0 12px 18px;overflow-y:auto;overflow-x:hidden;scrollbar-width:thin;scrollbar-color:#756889 #17131d}
+#overlay.info-overlay .info-panel::-webkit-scrollbar{width:10px}
+#overlay.info-overlay .info-panel::-webkit-scrollbar-track{background:#17131d}
+#overlay.info-overlay .info-panel::-webkit-scrollbar-thumb{background:#756889;border:2px solid #17131d}
+.info-panel-head{position:sticky;top:0;z-index:5;display:flex;align-items:center;justify-content:space-between;gap:10px;margin:0 -12px 10px;padding:10px 12px 8px;background:#111018;border-bottom:2px solid var(--dim)}
+.info-kicker{font-size:6px;letter-spacing:3px;color:var(--glow);font-weight:900}.info-panel-head h2{margin:2px 0 0;font-size:12px;line-height:1.15}.info-close{width:30px;height:30px;flex:0 0 30px;margin:0;padding:0;font-size:18px;line-height:1;border:3px solid var(--ink);background:#fff;color:#111;cursor:pointer;box-shadow:3px 3px 0 #000}
+.info-section{padding:9px 0 13px;border-bottom:2px solid #3c3542}.info-section h3{margin:0 0 7px;color:#ffd37a;font-size:8px;letter-spacing:1px}.info-section p{margin:6px 0;font-size:7px;line-height:1.65;color:#ddd5e2}.info-section ul{margin:6px 0 6px 15px;padding:0}.info-section li{margin:4px 0;font-size:7px;line-height:1.5;color:#ddd5e2}.info-grid{display:grid;gap:6px}.info-grid>div,.info-tier,.info-stages>div{padding:7px;border:2px solid #403744;background:#17141d}.info-grid b,.info-tier b,.info-stages b{display:block;color:#ffcf72;font-size:7px}.info-grid span,.info-stages span,.info-tier span{display:block;margin-top:3px;color:#bcb2c3;font-size:6px;line-height:1.5}.info-tier{margin-top:6px}.info-tier p{margin:5px 0 0}.info-stages{display:grid;gap:5px}.info-footer{text-align:center;padding:18px 0 6px;color:var(--dim);font-size:7px;line-height:1.7}
+@media(max-width:600px){#overlay.info-overlay{padding:0!important}#overlay.info-overlay .info-panel{top:0;right:0;bottom:0;width:100%;border-width:3px;box-shadow:none}.info-panel-head{padding-top:12px}}
+</style>
 </body>
 </html>
 
