@@ -131,9 +131,9 @@ button:disabled{opacity:.35;cursor:default;transform:none;box-shadow:5px 5px 0 v
 .game-particle{position:absolute;bottom:-12px;width:3px;height:3px;background:#8b7dff;box-shadow:5px -4px 0 rgba(124,107,255,.35);animation:floatPixel linear infinite;opacity:.6}
 @keyframes floatPixel{from{transform:translate(0,0);opacity:0}15%{opacity:.65}to{transform:translate(var(--dx),-110vh);opacity:0}}
 #levelName{font-size:9px;color:var(--glow);letter-spacing:1px;margin-bottom:8px}
-#runSideCards{display:flex;justify-content:space-between;gap:8px;position:fixed;left:8px;right:8px;top:92px;bottom:10px;max-height:calc(100vh - 102px);overflow-y:auto;overflow-x:hidden;pointer-events:none;z-index:2;padding-bottom:6px;scrollbar-width:thin}
-.run-card-column{width:min(150px,18vw);display:flex;flex-direction:column;gap:8px}
-.run-card{background:#f6f0d7;color:#2e291e;border:3px solid #6e5a35;padding:7px;font-size:7px;line-height:1.45;text-align:left;box-shadow:3px 3px 0 rgba(0,0,0,.35);pointer-events:auto}
+#runSideCards{position:fixed;left:8px;right:8px;top:104px;bottom:12px;display:grid;grid-template-columns:minmax(92px,150px) minmax(92px,150px);justify-content:space-between;align-items:stretch;gap:12px;pointer-events:none;z-index:20;padding:0;box-sizing:border-box}
+.run-card-column{min-width:0;display:flex;flex-direction:column;gap:8px;overflow-y:auto;overflow-x:hidden;padding:3px 4px 10px;scrollbar-width:thin;scrollbar-color:#756889 transparent;pointer-events:auto;box-sizing:border-box}
+.run-card{flex:0 0 auto;background:#f6f0d7;color:#2e291e;border:3px solid #6e5a35;padding:7px;font-size:7px;line-height:1.45;text-align:left;box-shadow:3px 3px 0 rgba(0,0,0,.35);pointer-events:auto}
 .run-card b{display:block;font-size:8px;margin-bottom:4px}.run-card span{display:block}.run-card .mini{font-size:6px;color:#806b43;margin-top:5px}
 #gardenSeed{margin:8px auto 12px;width:min(420px,90%);min-height:68px;border:3px solid #5d6841;background:rgba(20,35,20,.78);position:relative;box-shadow:4px 4px 0 rgba(0,0,0,.3);color:#e8f1c9}
 #gardenSeed .seed-ground{position:absolute;left:10%;right:10%;bottom:10px;height:6px;background:#55412b;border-top:3px solid #7c5e37}
@@ -151,7 +151,7 @@ button:disabled{opacity:.35;cursor:default;transform:none;box-shadow:5px 5px 0 v
 #screen-game[data-map="labyrinth"]{background:linear-gradient(135deg,rgba(40,120,95,.08),transparent 50%)}
 #screen-game[data-map="mirror"]{background:linear-gradient(90deg,rgba(80,150,255,.06),transparent 48%,rgba(150,100,255,.08))}
 #screen-game[data-map="garden"]{background:radial-gradient(circle at 50% 75%,rgba(100,190,80,.14),transparent 45%)}
-@media(max-width:900px){#runSideCards{display:flex;left:6px;right:6px;top:86px;bottom:8px;max-height:calc(100vh - 94px);gap:5px}.run-card-column{width:calc(50% - 3px);min-width:0}.run-card{font-size:6px;padding:6px}.run-card b{font-size:7px}.run-card .mini{font-size:5px}}
+@media(max-width:900px){#runSideCards{left:4px;right:4px;top:92px;bottom:8px;grid-template-columns:minmax(74px,24vw) minmax(74px,24vw);gap:5px}.run-card-column{gap:6px;padding:2px 2px 8px}.run-card{font-size:6px;padding:6px}.run-card b{font-size:7px}.run-card .mini{font-size:5px}}
 
 
 /* animated level atmosphere */
@@ -186,13 +186,13 @@ button:disabled{opacity:.35;cursor:default;transform:none;box-shadow:5px 5px 0 v
 #screen-game[data-map="mirror"] .atmo-window{color:#b6dcff}
 
 /* corruption system */
-#corruptionHud{width:min(420px,88%);margin:8px auto 12px;border:2px solid #5c5068;background:rgba(8,6,12,.94);padding:7px 9px;box-sizing:border-box;transition:border-color .3s,box-shadow .3s,filter .3s;}
-.corruption-head{display:block;text-align:center;font-size:9px;font-weight:900;color:#ff6d9e;letter-spacing:2px;line-height:1.2;text-shadow:0 0 6px rgba(255,55,120,.4)}
-.corruption-track{position:relative;width:100%;height:18px;margin-top:6px;background:#17111d;border:2px solid #4b3c55;box-sizing:border-box;overflow:hidden}
+#corruptionHud{width:min(250px,58vw);margin:5px auto 8px;border:0;background:transparent;padding:0;box-sizing:border-box;transition:filter .3s;}
+.corruption-head{display:block;text-align:center;font-size:7px;font-weight:900;color:#ff6d9e;letter-spacing:2px;line-height:1.1;text-shadow:0 0 5px rgba(255,55,120,.4)}
+.corruption-track{position:relative;width:100%;height:12px;margin-top:4px;background:#17111d;border:2px solid #4b3c55;box-sizing:border-box;overflow:hidden}
 .corruption-track::after{content:"";position:absolute;inset:0;background:repeating-linear-gradient(90deg,transparent 0 9.8%,rgba(255,255,255,.08) 9.8% 10%);pointer-events:none}
 .corruption-track #corruptionFill{display:block;height:100%;width:0;min-width:0;max-width:100%;background:linear-gradient(90deg,#6655ff 0%,#a92cff 55%,#ff315f 100%);transition:width .45s ease;box-shadow:0 0 10px rgba(255,55,120,.7);box-sizing:border-box}
 
-#corruptionStage{font-size:5px;color:#8e7da0;margin-top:3px;text-align:left;line-height:1.1}
+#corruptionStage{font-size:5px;color:#8e7da0;margin-top:2px;text-align:center;line-height:1.1}
 #screen-game.corruption-1 #corruptionHud{border-color:#715b8d}
 #screen-game.corruption-2 #corruptionHud{border-color:#a45a9e;box-shadow:0 0 10px rgba(180,50,170,.22)}
 #screen-game.corruption-3 #corruptionHud{border-color:#d45a88;box-shadow:0 0 14px rgba(220,50,110,.28)}
@@ -228,6 +228,40 @@ button:disabled{opacity:.35;cursor:default;transform:none;box-shadow:5px 5px 0 v
 #screen-game.corruption-off .door-frame.corrupted-door{box-shadow:none!important;animation:none!important}
 .secret-hole{display:none}.secret-door .door-frame-art{z-index:2;background-size:100% 100%;background-position:center center}.secret-door .door-leaf{z-index:3;background-size:100% 100%;background-position:center center}
 .secret-full-art{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;object-position:center center;image-rendering:auto;z-index:3;display:block;pointer-events:none;background:#000;filter:none!important}.secret-full-art.secret-open{filter:none!important}
+
+/* Full-screen boss room */
+#overlay.boss-room{position:fixed;inset:0;z-index:1000;background:radial-gradient(circle at 50% 40%,rgba(85,10,30,.32),rgba(4,3,8,.97) 72%);display:flex;align-items:stretch;justify-content:stretch;padding:0}
+.boss-room .boss-race-card{position:relative;width:100%;max-width:none!important;height:100%;min-height:100vh;margin:0;padding:24px 18px;box-sizing:border-box;background:transparent;border:0;box-shadow:none;animation:none;display:grid;grid-template-columns:minmax(150px,22vw) 1fr minmax(150px,22vw);grid-template-rows:auto 1fr;gap:10px;align-items:center;overflow:hidden}
+.boss-room .boss-title{grid-column:1/-1;text-align:center;align-self:start;margin:0}
+.boss-room .boss-title h2{margin:2px 0 3px;font-size:18px;color:#ffd37a;letter-spacing:2px;text-shadow:0 0 12px rgba(255,80,100,.5)}
+.boss-room .boss-hp{margin:0;font-size:9px;color:#ff8e9d}
+.boss-room .boss-side{height:min(58vh,430px);border:3px solid #513a48;background:rgba(14,8,17,.88);padding:14px;box-sizing:border-box;display:flex;flex-direction:column;justify-content:center;gap:10px;box-shadow:5px 5px 0 #000}
+.boss-room .boss-side.left{grid-column:1;grid-row:2}
+.boss-room .boss-side.right{grid-column:3;grid-row:2;text-align:center}
+.boss-room .boss-side-label{font-size:7px;color:#a99bad;letter-spacing:1px}
+.boss-room .boss-target-name{font-size:14px;color:#ffd37a;line-height:1.2;word-break:break-word}
+.boss-room .boss-penalty{font-size:7px;color:#ff9ba8;line-height:1.5;border-top:2px solid #3f2c39;padding-top:10px}
+.boss-room .boss-timer-label{font-size:7px;color:#a99bad;letter-spacing:1px}
+.boss-room .boss-timer-big{font-size:28px;color:#fff0b8;text-shadow:0 0 10px rgba(255,210,100,.5)}
+.boss-room .boss-timer-big.late{color:#ff4f68;animation:bossLate .35s steps(2,end) infinite}
+.boss-room .boss-money-penalty{font-size:8px;color:#ff7687;line-height:1.5;border-top:2px solid #3f2c39;padding-top:10px}
+.boss-room .boss-center{grid-column:2;grid-row:2;min-width:0;width:min(720px,100%);justify-self:center}
+.boss-room .boss-instruction{text-align:center;margin:0 0 8px}
+.boss-room .boss-door-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin-top:0}
+.boss-room .boss-door-option{min-width:0;padding:8px}
+.boss-room .boss-door-visual{width:100%;max-height:54vh}
+.boss-room .boss-door-option strong{font-size:8px}
+@media(max-width:800px){
+  .boss-room .boss-race-card{grid-template-columns:92px 1fr 92px;padding:12px 6px;gap:5px}
+  .boss-room .boss-title h2{font-size:13px}
+  .boss-room .boss-side{height:auto;min-height:210px;padding:8px}
+  .boss-room .boss-target-name{font-size:10px}
+  .boss-room .boss-timer-big{font-size:21px}
+  .boss-room .boss-money-penalty,.boss-room .boss-penalty{font-size:6px}
+  .boss-room .boss-door-grid{gap:5px}
+  .boss-room .boss-door-option{padding:4px}
+}
+
 </style>
 </head>
 <body>
@@ -264,10 +298,10 @@ button:disabled{opacity:.35;cursor:default;transform:none;box-shadow:5px 5px 0 v
   <button class="info-btn" onclick="showInfo()" aria-label="Spielregeln">i</button>
   <div id="gameParticles"></div><div id="levelAtmosphere"></div><div id="levelName"></div><div id="runSideCards"><div class="run-card-column" id="runCards"></div><div class="run-card-column" id="runCardsRight"></div></div>
   <div id="hud"><span>ROOM <b id="round">0</b></span><span>$<b id="money">0</b></span></div>
-  <div id="corruptionHud" aria-label="Corruption">
-    <div class="corruption-head"><span>☠ CORRUPTION</span></div>
+  <div id="corruptionHud" aria-label="Corruption percentage">
+    <div class="corruption-head"><span>CORRUPTION</span></div>
     <div class="corruption-track"><div id="corruptionFill"></div></div>
-    <div id="corruptionStage">STABLE</div>
+    <div id="corruptionStage">0%</div>
   </div>
   <div id="statusRow" class="small" style="margin-bottom:10px;min-height:10px"></div>
   <div id="gardenSeed" class="hidden"><div class="seed-ground"></div><div class="seed-core"></div><div class="stem"></div><div class="left"></div><div class="right"></div><div id="seedText">Growth 0/3 — 3 rooms to bloom</div></div>
@@ -334,7 +368,7 @@ function updateCorruptionUI(){
   const fill=document.getElementById('corruptionFill');
   const stage=document.getElementById('corruptionStage');
   if(fill){ const pct=Math.max(0,Math.min(100,Number(run.corruption)||0)); fill.style.width=pct+'%'; fill.setAttribute('aria-valuenow',String(pct)); }
-  if(stage) stage.textContent=corruptionName()+' — '+CORRUPTION_STAGES[corruptionStage()].desc;
+  if(stage){ const pct=Math.max(0,Math.min(100,Number(run.corruption)||0)); stage.textContent=pct.toFixed(1)+'%'; }
 }
 function addCorruption(amount,reason,opts={}){
   if(meta.corruptionEnabled===false || !run || run.over || !amount) return;
@@ -670,12 +704,15 @@ let musicMode='title';
 let musicEnabled=true;
 
 function ensureMusic(){
+  if(localStorage.getItem('doomdoors_music_volume_v3')===null){
+    localStorage.setItem('doomdoors_music_volume_v3','1');
+  }
   if(musicTitle && musicRun) return;
   musicTitle=document.getElementById('musicTitle');
   musicRun=document.getElementById('musicRun');
 
-  const savedVol=Number(localStorage.getItem('doomdoors_music_volume'));
-  const volume=Number.isFinite(savedVol)?Math.max(0,Math.min(1,savedVol)):.72;
+  const savedVol=Number(localStorage.getItem('doomdoors_music_volume_v3'));
+  const volume=Number.isFinite(savedVol)?Math.max(0,Math.min(1,savedVol)):1;
   const savedEnabled=localStorage.getItem('doomdoors_music_enabled');
   musicEnabled=savedEnabled===null ? true : savedEnabled==='1';
 
@@ -685,8 +722,8 @@ function ensureMusic(){
 }
 
 function currentMusicVolume(){
-  const savedVol=Number(localStorage.getItem('doomdoors_music_volume'));
-  return Number.isFinite(savedVol)?Math.max(0,Math.min(1,savedVol)):.72;
+  const savedVol=Number(localStorage.getItem('doomdoors_music_volume_v3'));
+  return Number.isFinite(savedVol)?Math.max(0,Math.min(1,savedVol)):1;
 }
 
 function applyMusicSettings(){
@@ -798,8 +835,8 @@ function openSettings(){
   ov.classList.remove('hidden');
   ensureMusic();
 
-  const savedVol=Number(localStorage.getItem('doomdoors_music_volume'));
-  const vol=Number.isFinite(savedVol)?Math.max(0,Math.min(1,savedVol)):.72;
+  const savedVol=Number(localStorage.getItem('doomdoors_music_volume_v3'));
+  const vol=Number.isFinite(savedVol)?Math.max(0,Math.min(1,savedVol)):1;
   const enabled=localStorage.getItem('doomdoors_music_enabled')!=='0';
 
   ov.innerHTML=`<div class="card-box settings-box">
@@ -825,7 +862,7 @@ function openSettings(){
   const applyVolume=()=>{
     const v=Number(slider.value)/100;
     value.textContent=slider.value+'%';
-    localStorage.setItem('doomdoors_music_volume',String(v));
+    localStorage.setItem('doomdoors_music_volume_v3',String(v));
     applyMusicSettings();
   };
   slider.oninput=applyVolume;
@@ -846,6 +883,15 @@ function show(id){
     startTitleAudio();
   }
 }
+// Start title music immediately when possible. Browsers may block autoplay until the first gesture;
+ // the one-shot gesture fallback starts it as soon as the user interacts.
+function bootMusic(){
+  try{ ensureMusic(); startTitleAudio(); }catch(e){}
+}
+if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',bootMusic,{once:true});
+else bootMusic();
+['pointerdown','keydown','touchstart'].forEach(ev=>document.addEventListener(ev,()=>{try{startTitleAudio();}catch(e){}},{once:true,passive:true}));
+
 function renderRules(animate){
   const cnt=document.getElementById('ruleCount');
   if(cnt) cnt.textContent=run.rules.length;
@@ -1254,6 +1300,7 @@ function openMiniBoss(after){
   const cleanup=()=>{if(timerId){clearInterval(timerId);timerId=null;}};
   const finish=()=>{
     cleanup();
+    ov.classList.remove('boss-room');
     startRunAudio();
     run.bossesDefeated=(run.bossesDefeated||0)+1;
     run.boss=null;
@@ -1263,6 +1310,7 @@ function openMiniBoss(after){
   };
   const defeatScreen=()=>{
     cleanup();
+    ov.classList.remove('boss-room');
     run.money+=b.reward;
     document.getElementById('money').textContent=run.money;
     ov.innerHTML=`<div class="card-box boss-card boss-danger"><h2>☠ BOSS DEFEATED</h2><p>${b.name} falls back into the darkness.</p><p style="color:var(--glow)">+$${b.reward}</p><button id="bossContinue">CONTINUE</button></div>`;
@@ -1278,13 +1326,26 @@ function openMiniBoss(after){
     const target=choices[Math.floor(Math.random()*choices.length)];
     const started=performance.now();
     const hp='■'.repeat(Math.max(0,run.boss.hp))+'□'.repeat(Math.max(0,run.boss.maxHp-run.boss.hp));
-    ov.innerHTML=`<div class="card-box boss-card boss-race-card">
-      <h2>☠ ${b.name}</h2>
-      <p>${b.desc}</p>
-      <div class="boss-hp">BOSS HP ${hp}</div>
-      <div class="boss-target"><span>TARGET DOOR</span><b>${target.name.toUpperCase()}</b><em id="bossTimer">0.0s</em></div>
-      <p class="boss-instruction">OPEN THE CORRECT DOOR AS FAST AS POSSIBLE</p>
-      <div class="boss-door-grid" id="bossDoorGrid"></div>
+    ov.classList.add('boss-room');
+    ov.innerHTML=`<div class="boss-card boss-race-card">
+      <div class="boss-title">
+        <h2>☠ ${b.name}</h2>
+        <div class="boss-hp">HP ${hp}</div>
+      </div>
+      <aside class="boss-side left">
+        <div class="boss-side-label">FIND THIS DOOR</div>
+        <div class="boss-target-name">${target.name.toUpperCase()}</div>
+        <div class="boss-penalty">Wrong door:<br><b>-$20–$30</b><br><br>Too slow (&gt;6s):<br><b>-$10 + extra</b></div>
+      </aside>
+      <main class="boss-center">
+        <p class="boss-instruction">${b.desc}</p>
+        <div class="boss-door-grid" id="bossDoorGrid"></div>
+      </main>
+      <aside class="boss-side right">
+        <div class="boss-timer-label">TIME</div>
+        <div class="boss-timer-big" id="bossTimer">0.0s</div>
+        <div class="boss-money-penalty">PENALTY<br>WRONG / SLOW<br><b>SEE LEFT</b></div>
+      </aside>
     </div>`;
     const grid=document.getElementById('bossDoorGrid');
     choices.forEach(d=>{
@@ -1535,7 +1596,7 @@ function openShop(){
 function showInfo(){
   const ov=document.getElementById('overlay');
   ov.classList.remove('hidden');
-  ov.innerHTML=`<div class="card-box"><h2>DOOMDOORS — RULES</h2><p>Choose one of six doors each room. Survive, earn coins, learn rules and buy cards.</p>${meta.corruptionEnabled?'<p><b>CORRUPTION</b> rises as you play. Higher corruption makes doors more dangerous and can corrupt shop cards. At 100% a Corruption Surge gives you a choice to purify, embrace, or endure it.</p><p>The Garden can reduce corruption when its seed blooms. Some maps and cards interact with the corruption.</p>':''}<button id="closeInfo">CLOSE</button></div>`;
+  ov.innerHTML=`<div class="card-box"><h2>DOOMDOORS — RULES</h2><p>Choose one of six doors each room. Survive, earn coins, learn rules and buy cards.</p>${meta.corruptionEnabled?'<p><b>CORRUPTION</b> rises as you play. Higher corruption makes doors more dangerous and can corrupt shop cards. At 100% a Corruption Surge gives you a choice to purify, embrace, or endure it.</p><p>The Garden can reduce corruption when its seed blooms. Some maps and cards interact with the corruption.</p>':''}<div style="margin-top:34px;padding-top:18px;border-top:2px solid var(--dim);text-align:center;font-size:7px;color:var(--dim);line-height:1.7">From Josua without AI<br>Menrath is calling</div><button id="closeInfo">CLOSE</button></div>`;
   document.getElementById('closeInfo').onclick=()=>ov.classList.add('hidden');
 }
 
@@ -1968,4 +2029,13 @@ function metaRow(label, cost, onBuy, owned=false, unlocked=true){
   #doors{column-gap:7px;row-gap:38px;margin-bottom:30px}
   .door-name{bottom:-27px;font-size:6px;min-width:62px;padding:4px 5px}
 }
+</style>
+
+<style id="final-layout-safety">
+#screen-title .info-btn{display:none!important}
+#screen-game #runSideCards{pointer-events:none}
+#screen-game #runSideCards .run-card-column{pointer-events:auto}
+#screen-game #doors{max-width:min(760px,58vw);margin-left:auto;margin-right:auto}
+@media(max-width:900px){#screen-game #doors{max-width:66vw}}
+@media(max-width:700px){#screen-game #doors{max-width:96vw}}
 </style>
