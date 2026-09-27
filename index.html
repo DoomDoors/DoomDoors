@@ -211,20 +211,14 @@ button:disabled{opacity:.35;cursor:default;transform:none;box-shadow:5px 5px 0 v
  .boss-race-card{max-width:760px!important}.boss-target{display:flex;align-items:center;justify-content:center;gap:12px;flex-wrap:wrap;border:3px solid #6e5261;background:rgba(20,5,12,.72);padding:10px;margin:10px 0}.boss-target span{font-size:7px;color:var(--dim)}.boss-target b{font-size:13px;color:#ffd37a;letter-spacing:1px;text-shadow:0 0 8px rgba(255,100,120,.45)}.boss-target em{font-size:11px;font-style:normal;color:#ff9ba8;min-width:42px}.boss-target em.late{color:#ff4f68;animation:bossLate .35s steps(2,end) infinite}.boss-instruction{font-size:7px;color:var(--dim);letter-spacing:.5px}.boss-door-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:12px}.boss-door-option{position:relative;display:flex;flex-direction:column;align-items:center;gap:5px;padding:7px;background:#16131b;border:3px solid #4b4350;box-shadow:4px 4px 0 #000;cursor:pointer}.boss-door-option:hover{transform:translateY(-3px);border-color:var(--glow)}.boss-door-option:disabled{opacity:.75;cursor:default}.boss-door-visual{display:block;position:relative;width:100%;aspect-ratio:320/467}.boss-door-frame,.boss-door-leaf{position:absolute;inset:0;background-size:100% 100%;background-position:center;background-repeat:no-repeat}.boss-door-frame{z-index:1}.boss-door-leaf{z-index:2;filter:drop-shadow(3px 4px 0 rgba(0,0,0,.3))}.boss-door-option strong{font-size:8px;color:var(--ink)}@keyframes bossLate{50%{transform:scale(1.08)}}@media(max-width:700px){.boss-door-grid{gap:5px}.boss-door-option{padding:4px}.boss-target b{font-size:10px}}
 .event-choice{display:block;width:90%;margin:8px auto}.event-tag{font-size:7px;color:var(--dim);margin-bottom:10px}
 
-/* title screen upgrade */
-#screen-title{position:relative;min-height:72vh;display:flex;flex-direction:column;align-items:center;justify-content:center;overflow:hidden;padding:36px 18px;box-sizing:border-box}
-#screen-title::before{content:"";position:absolute;inset:7%;border:2px solid rgba(124,107,255,.28);box-shadow:0 0 0 6px rgba(255,255,255,.025),0 0 35px rgba(124,107,255,.14) inset;pointer-events:none}
-#screen-title::after{content:"";position:absolute;width:420px;height:420px;border-radius:50%;background:radial-gradient(circle,rgba(124,107,255,.14),rgba(124,107,255,.04) 35%,transparent 68%);animation:titlePulse 3.8s ease-in-out infinite;pointer-events:none}
-#screen-title h1{position:relative;z-index:3;margin:10px 0 5px;font-size:clamp(30px,7vw,58px);letter-spacing:4px;text-shadow:4px 4px 0 #16131f,0 0 10px rgba(124,107,255,.7),0 0 28px rgba(124,107,255,.35);animation:titleFlicker 5s steps(2,end) infinite}
-.title-kicker{position:relative;z-index:3;font-size:7px;letter-spacing:3px;color:#c7c0dc;margin-bottom:10px}
-.title-subline{position:relative;z-index:3;display:flex;align-items:center;gap:9px;margin:8px 0 14px;color:#777487;font-size:6px;letter-spacing:1px}.title-subline i{width:38px;height:2px;background:#5d566d;display:block}.title-subline b{color:#9d91ff;font-weight:normal}
-.title-doors{position:relative;z-index:3;display:flex;gap:10px;margin:2px 0 16px}.title-door{width:34px;height:52px;border:3px solid #4b4557;background:linear-gradient(90deg,#15151b,#3a3545,#14141a);box-shadow:3px 3px 0 #000;position:relative}.title-door:nth-child(1){border-color:#7e343c;background:linear-gradient(90deg,#291014,#76232c,#291014)}.title-door:nth-child(2){border-color:#4e80aa;background:linear-gradient(90deg,#11263c,#245e8d,#11263c)}.title-door:nth-child(3){border-color:#7658a8;background:linear-gradient(90deg,#241632,#6c3c91,#241632)}.title-door::after{content:"";position:absolute;left:50%;top:45%;width:8px;height:8px;border:2px solid #c4b9d8;transform:translate(-50%,-50%) rotate(45deg);box-shadow:0 0 7px rgba(255,255,255,.2)}
-.title-status{position:relative;z-index:3;display:flex;gap:16px;border:2px solid #3f3949;background:rgba(5,5,9,.72);padding:7px 11px;margin:0 0 16px;font-size:6px;color:#777487;box-shadow:3px 3px 0 #000}.title-status b{color:#b5ffbd;font-weight:normal}.title-status span{color:#777487}
-#screen-title .rainbow-bar{position:relative;z-index:3;width:min(340px,70%);opacity:.8;box-shadow:0 0 12px rgba(124,107,255,.35)}
-#screen-title .sub{position:relative;z-index:3;margin:12px 0 15px;font-size:7px;letter-spacing:1px;color:#aaa5b8}
-#screen-title button{position:relative;z-index:4;min-width:180px;margin:4px 0;box-shadow:5px 5px 0 #000}
-@keyframes titlePulse{0%,100%{transform:scale(.9);opacity:.6}50%{transform:scale(1.08);opacity:1}}
-@keyframes titleFlicker{0%,92%,100%{filter:none}94%{filter:brightness(1.35)}96%{filter:brightness(.85)}}
+/* title screen — original DoomDoors layout */
+#screen-title,#screen-mapselect,#screen-meta{position:relative;}
+#screen-title .info-btn,#screen-mapselect .info-btn,#screen-meta .info-btn{position:absolute;top:10px;right:10px;width:32px;height:32px;padding:0;border:3px solid var(--ink);background:#fff;color:#111;font-size:14px;z-index:20;box-shadow:3px 3px 0 rgba(0,0,0,.2);cursor:pointer;}
+#screen-game .info-btn{position:absolute;top:10px;right:10px;width:32px;height:32px;padding:0;border:3px solid var(--ink);background:#fff;color:#111;font-size:14px;z-index:20;box-shadow:3px 3px 0 rgba(0,0,0,.2);cursor:pointer;}
+#screen-title .info-btn:hover,#screen-mapselect .info-btn:hover,#screen-meta .info-btn:hover,#screen-game .info-btn:hover{transform:translate(-1px,-1px);}
+.settings-box{max-width:520px;width:100%;}
+.settings-row{border:2px solid var(--dim);padding:12px;margin:8px 0;text-align:left;font-size:9px;}
+.settings-row input[type=range]{width:100%;margin-top:9px;}
 #screen-game.corruption-off #corruptionHud{display:none!important}
 #screen-game.corruption-off .corruption-mark{display:none!important}
 #screen-game.corruption-off #doors{animation:none!important}
@@ -243,20 +237,19 @@ button:disabled{opacity:.35;cursor:default;transform:none;box-shadow:5px 5px 0 v
 <div class="chain left"></div>
 <div class="chain right"></div>
 
-<div id="screen-title" onclick="playMusic('normal')">
+<div id="screen-title">
+  <button class="info-btn" onclick="showInfo()" aria-label="Spielregeln">i</button>
   <div class="candle"></div>
-  <div class="title-kicker">THE DOORS ARE WAITING</div>
   <h1>DoomDoors</h1>
-  <div class="title-subline"><i></i><b>ENTER IF YOU DARE</b><i></i></div>
   <div class="rainbow-bar"></div>
-  <div class="title-doors"><span class="title-door"></span><span class="title-door"></span><span class="title-door"></span></div>
   <div class="sub">six doors. one rule. no way back.</div>
-  <div class="title-status"><span>RUN PROTOCOL</span><b>ACTIVE</b><span>UNKNOWN DESTINATION</span></div>
   <button onclick="showMapSelect()">PLAY</button><br>
-  <button onclick="openMeta()">UPGRADES</button>
+  <button onclick="openMeta()">UPGRADES</button><br>
+  <button onclick="openSettings()">SETTINGS</button>
 </div>
 
 <div id="screen-mapselect" class="hidden">
+  <button class="info-btn" onclick="showInfo()" aria-label="Spielregeln">i</button>
   <h1 style="font-size:20px">CHOOSE A PLACE</h1>
   <div id="mapList"></div>
   <div id="corruptionToggle" class="small" style="margin:10px auto 12px;max-width:420px;border:2px solid var(--dim);padding:8px;background:var(--panel);text-align:left">
@@ -285,6 +278,7 @@ button:disabled{opacity:.35;cursor:default;transform:none;box-shadow:5px 5px 0 v
 </div>
 
 <div id="screen-meta" class="hidden">
+  <button class="info-btn" onclick="showInfo()" aria-label="Spielregeln">i</button>
   <h1 style="font-size:20px">UPGRADES</h1>
   <div class="sub">rule points: <span id="rp">0</span></div>
   <div id="metalist"></div>
@@ -678,8 +672,9 @@ function ensureMusic(){
   if(musicNormal&&musicBoss)return;
   musicNormal=document.getElementById('musicNormal');
   musicBoss=document.getElementById('musicBoss');
-  if(musicNormal){musicNormal.loop=true;musicNormal.volume=.72;}
-  if(musicBoss){musicBoss.loop=true;musicBoss.volume=.82;}
+  const savedVol=Number(localStorage.getItem('doomdoors_music_volume')); const normalVol=Number.isFinite(savedVol)?Math.max(0,Math.min(1,savedVol)):.72;
+  if(musicNormal){musicNormal.loop=true;musicNormal.volume=normalVol;}
+  if(musicBoss){musicBoss.loop=true;musicBoss.volume=Math.min(1,normalVol+.10);}
 }
 function playMusic(mode='normal'){
   ensureMusic();
@@ -744,6 +739,18 @@ function startRun(mapId){
   window.nextRound();
 }
 function backTitle(){ show('screen-title'); playMusic('normal'); }
+function openSettings(){
+  const ov=document.getElementById('overlay');
+  ov.classList.remove('hidden');
+  const saved=Number(localStorage.getItem('doomdoors_music_volume'));
+  const vol=Number.isFinite(saved)?Math.max(0,Math.min(1,saved)):.72;
+  ensureMusic();
+  ov.innerHTML=`<div class="card-box settings-box"><h2>SETTINGS</h2><div class="settings-row"><b>MUSIC VOLUME</b><input id="musicVolumeSetting" type="range" min="0" max="100" value="${Math.round(vol*100)}"><div class="small"><span id="musicVolumeValue">${Math.round(vol*100)}%</span></div></div><button id="closeSettings">CLOSE</button></div>`;
+  const slider=document.getElementById('musicVolumeSetting'), value=document.getElementById('musicVolumeValue');
+  const apply=()=>{ const v=Number(slider.value)/100; value.textContent=slider.value+'%'; localStorage.setItem('doomdoors_music_volume',String(v)); if(musicNormal)musicNormal.volume=v; if(musicBoss)musicBoss.volume=Math.min(1,v+.10); };
+  slider.oninput=apply;
+  document.getElementById('closeSettings').onclick=()=>ov.classList.add('hidden');
+}
 function openMeta(){ renderMeta(); show('screen-meta'); }
 
 function show(id){
@@ -1577,7 +1584,7 @@ function metaRow(label, cost, onBuy, owned=false, unlocked=true){
       document.querySelectorAll('.corruption-mark').forEach(el=>el.remove());
       document.querySelectorAll('.corrupted-door').forEach(el=>{el.classList.remove('corrupted-door');el.removeAttribute('data-extra');});
     }else{
-      if(hud)hud.style.display='';
+      if(hud)hud.style.display='block';
       if(screen)screen.classList.remove('corruption-off');
       oldUpdateCorruptionUI();
     }
